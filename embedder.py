@@ -1,14 +1,27 @@
 import hashlib
 import math
+import os
 import re
 
-try:
-    from sentence_transformers import SentenceTransformer
-except ImportError:
+# On Render free tier (512MB RAM), loading sentence-transformers + PyTorch
+# exceeds memory. Set USE_HASH_EMBEDDINGS=true in Render environment variables
+# to use the lightweight hash fallback instead.
+_use_hash = os.getenv("USE_HASH_EMBEDDINGS", "false").lower() == "true"
+
+if _use_hash:
     SentenceTransformer = None
+    model = None
+    print("USE_HASH_EMBEDDINGS=true — using hash fallback embeddings (memory-safe mode).")
+else:
+    try:
+        from sentence_transformers import SentenceTransformer
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+    except ImportError:
+        SentenceTransformer = None
+        model = None
+        print("sentence-transformers unavailable; using hashed fallback embeddings.")
 
 VECTOR_SIZE = 384
-model = SentenceTransformer('all-MiniLM-L6-v2') if SentenceTransformer else None
 
 
 def _tokenize(text: str) -> list[str]:
@@ -28,17 +41,16 @@ def _hash_embedding(text: str) -> list[float]:
         return vector
     return [value / norm for value in vector]
 
+
 def embed_texts(texts: list) -> list:
     if model is None:
-        print("sentence-transformers unavailable; using hashed fallback embeddings.")
         return [_hash_embedding(text) for text in texts]
-
     embeddings = model.encode(texts, show_progress_bar=True)
     return embeddings.tolist()
+
 
 def embed_query(question: str) -> list:
     if model is None:
         return _hash_embedding(question)
-
     embedding = model.encode(question)
     return embedding.tolist()
