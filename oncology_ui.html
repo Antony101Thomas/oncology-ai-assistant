@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ONCO AI</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,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"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root, [data-theme="dark"] {
+      --bg:       #212121;
+      --bg2:      #2f2f2f;
+      --bg3:      #3a3a3a;
+      --border:   rgba(255,255,255,0.08);
+      --border2:  rgba(255,255,255,0.14);
+      --teal:     #10a37f;
+      --teal-dim: rgba(16,163,127,0.10);
+      --teal-glow:rgba(16,163,127,0.20);
+      --text:     #ececec;
+      --text2:    #b4b4b4;
+      --text3:    #6e6e6e;
+      --success:  #10a37f;
+      --warn:     #d4a017;
+      --danger:   #ef4444;
+      --badge-high: rgba(16,163,127,0.15);
+      --badge-mid:  rgba(212,160,23,0.15);
+      --bubble-bg:  #2f2f2f;
+      --shadow:     rgba(0,0,0,0.4);
+    }
+
+    [data-theme="light"] {
+      --bg:       #f0f4f8;
+      --bg2:      #ffffff;
+      --bg3:      #e8eef4;
+      --border:   rgba(59,130,180,0.18);
+      --border2:  rgba(59,130,180,0.32);
+      --teal:     #2b7aac;
+      --teal-dim: rgba(59,130,180,0.08);
+      --teal-glow:rgba(59,130,180,0.14);
+      --text:     #1a202c;
+      --text2:    #4a5568;
+      --text3:    #94a3b8;
+      --success:  #276749;
+      --warn:     #975a16;
+      --danger:   #c53030;
+      --badge-high: rgba(39,103,73,0.12);
+      --badge-mid:  rgba(151,90,22,0.12);
+      --bubble-bg:  #dbeafe;
+      --shadow:     rgba(0,0,0,0.08);
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; transition: background 0.25s, color 0.25s; }
+    .shell { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ── Top bar ── */
+    .topbar { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--bg); flex-shrink: 0; }
+    .topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .topbar-sub   { font-size: 11px; color: var(--text3); }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .theme-btn { width: 34px; height: 34px; border-radius: 8px; background: var(--bg3); border: 0.5px solid var(--border2); color: var(--text2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; flex-shrink: 0; }
+    .theme-btn:hover { background: var(--teal-glow); color: var(--teal); }
+    .status-pill { display: flex; align-items: center; gap: 6px; background: rgba(72,187,120,0.1); border: 0.5px solid rgba(72,187,120,0.25); border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--success); }
+    .status-dot  { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 6px rgba(72,187,120,0.6); }
+    .user-chip { display: flex; align-items: center; gap: 6px; background: var(--teal-dim); border: 0.5px solid var(--border2); border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--teal); }
+    .logout-btn { background: none; border: 0.5px solid var(--border2); border-radius: 8px; padding: 5px 10px; font-size: 11px; color: var(--text3); cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+    .logout-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* ── Layout ── */
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 260px; border-right: 1px solid var(--border); background: var(--bg2); padding: 16px 0; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; transition: background 0.25s; }
+    .sidebar-section { padding: 0 12px 14px; }
+    .sidebar-label { font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; padding: 0 8px; margin-bottom: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; }
+    .nav-item:hover { background: var(--teal-dim); color: var(--text); }
+    .nav-item.active { background: var(--teal-glow); color: var(--teal); }
+    .nav-item i { font-size: 15px; }
+    .divider { height: 0.5px; background: var(--border); margin: 6px 12px 10px; }
+    .history-list { padding: 0 12px; display: flex; flex-direction: column; gap: 4px; }
+    .history-item { padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--text2); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.15s, color 0.15s; }
+    .history-item:hover { background: var(--teal-dim); color: var(--text); }
+    .history-empty { font-size: 11px; color: var(--text3); padding: 4px 8px; }
+
+    /* ── Chat area ── */
+    .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); transition: background 0.25s; }
+    .messages { flex: 1; padding: 24px 24px 8px; display: flex; flex-direction: column; gap: 22px; overflow-y: auto; }
+
+    /* ── Welcome ── */
+    .welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 20px; padding: 40px; text-align: center; }
+    .welcome-icon { font-size: 40px; color: var(--teal); opacity: 0.85; }
+    .welcome h2 { font-size: 24px; font-weight: 600; color: var(--text); }
+    .welcome p  { font-size: 14px; color: var(--text3); max-width: 460px; line-height: 1.6; }
+    .welcome-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; max-width: 560px; width: 100%; }
+    .chip { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 10px 16px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left; line-height: 1.4; }
+    .chip:hover { background: var(--bg3); color: var(--text); }
+
+    /* ── Messages ── */
+    .msg-user { align-self: flex-end; max-width: 68%; }
+    .msg-user .bubble { background: var(--bg3); border-radius: 18px; padding: 12px 18px; font-size: 14px; color: var(--text); line-height: 1.65; }
+    .msg-ai { align-self: flex-start; max-width: 90%; width: 100%; }
+    .ai-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+    .ai-avatar { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg,#0d8a6a,#10a37f); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
+    .ai-name { font-size: 12px; color: var(--text3); font-weight: 600; }
+    .answer-card { background: transparent; border: none; overflow: hidden; }
+    .answer-body { font-size: 14px; color: var(--text); line-height: 1.75; white-space: pre-wrap; }
+    .citations { border-top: 1px solid var(--border); padding: 12px 0 6px; display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+    .cite-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
+    .cite-item { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--teal); }
+    .cite-item i { font-size: 13px; margin-top: 1px; flex-shrink: 0; }
+    .cite-src { color: var(--text2); font-size: 11px; margin-left: 20px; margin-top: 1px; }
+    .meta-row { border-top: 1px solid var(--border); padding: 10px 0 4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-high      { background: var(--badge-high); color: var(--success); }
+    .badge-mid       { background: var(--badge-mid);  color: var(--warn); }
+    .badge-validated { background: rgba(99,179,237,0.1); color: var(--teal); }
+    .meta-sep     { color: var(--text3); font-size: 11px; }
+    .source-count { margin-left: auto; font-size: 11px; color: var(--text3); }
+
+    /* ── Input bar ── */
+    .input-bar { padding: 12px 24px 14px; background: var(--bg); flex-shrink: 0; }
+    .input-row { display: flex; gap: 10px; align-items: center; background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 8px 12px; transition: border-color 0.2s; }
+    .input-row:focus-within { border-color: rgba(255,255,255,0.25); }
+    .input-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
+    .input-wrap input { background: transparent; border: none; outline: none; font-size: 14px; color: var(--text); flex: 1; font-family: inherit; }
+    .input-wrap input::placeholder { color: var(--text3); }
+    .attach-btn { color: var(--text3); cursor: pointer; font-size: 17px; background: none; border: none; padding: 2px; transition: color 0.15s; }
+    .attach-btn:hover { color: var(--teal); }
+    .send-btn { width: 38px; height: 38px; border-radius: 9px; background: #10a37f; border: none; color: #fff; cursor: pointer; font-size: 17px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; flex-shrink: 0; }
+    .send-btn:hover { background: #0d8a6a; }
+    .disclaimer { text-align: center; font-size: 11px; color: var(--text3); padding: 8px 0 2px; }
+    .upload-status { min-height: 18px; padding-top: 6px; font-size: 11px; color: var(--text3); text-align: center; }
+    .upload-status.ok  { color: var(--success); }
+    .upload-status.err { color: var(--danger); }
+
+    /* ── Typing ── */
+    .typing { display: flex; align-items: center; gap: 5px; padding: 4px 0; }
+    .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: bounce 1.2s infinite; }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);} }
+
+    /* ── Source cards ── */
+    .source-card { margin: 0 4px 6px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--bg3); }
+    .source-card-header { display: flex; align-items: center; gap: 7px; padding: 8px 10px; cursor: pointer; user-select: none; }
+    .source-card-title { flex: 1; font-size: 12.5px; color: var(--text); font-weight: 500; }
+    .source-chevron { font-size: 12px; color: var(--text3); transition: transform 0.2s; }
+    .source-chevron.open { transform: rotate(180deg); }
+    .source-card-body { padding: 0 10px 10px; display: flex; flex-direction: column; gap: 5px; }
+    .source-stat { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); line-height: 1.4; }
+    .source-stat i { font-size: 11px; color: var(--text3); flex-shrink: 0; }
+    .source-tag { display: inline-block; font-size: 10px; color: var(--teal); background: var(--teal-dim); border-radius: 4px; padding: 2px 7px; margin-top: 2px; }
+    .source-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green  { background: #10a37f; box-shadow: 0 0 5px rgba(16,163,127,0.5); }
+    .dot-teal   { background: #38bdf8; box-shadow: 0 0 5px rgba(56,189,248,0.5); }
+    .dot-purple { background: #a78bfa; box-shadow: 0 0 5px rgba(167,139,250,0.5); }
+    .nccn-file { font-size: 11px; color: var(--text2); padding: 4px 6px; margin: 1px 0; display: flex; align-items: center; gap: 6px; border-radius: 5px; text-decoration: none; transition: background 0.15s, color 0.15s; cursor: pointer; }
+    .nccn-file:hover { background: var(--teal-dim); color: var(--teal); }
+    .nccn-file i { font-size: 10px; color: var(--teal); flex-shrink: 0; }
+    .nccn-file span { flex: 1; }
+
+    /* ── Typewriter cursor ── */
+    .cursor { display: inline-block; color: var(--teal); animation: blink 0.7s step-start infinite; margin-left: 1px; }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+    /* ── Auth screens ── */
+    .auth-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .auth-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 16px; padding: 36px 32px; width: 100%; max-width: 400px; box-shadow: 0 8px 32px var(--shadow); }
+    .auth-logo { text-align: center; margin-bottom: 20px; }
+    .auth-logo-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg,#0d8a6a,#10a37f); display: inline-flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; margin-bottom: 10px; }
+    .auth-title { font-size: 20px; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 4px; }
+    .auth-sub { font-size: 12px; color: var(--text3); text-align: center; margin-bottom: 24px; }
+    .auth-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .auth-field label { font-size: 11px; color: var(--text2); font-weight: 600; }
+    .auth-field input { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text); font-family: inherit; outline: none; transition: border-color 0.2s; }
+    .auth-field input:focus { border-color: var(--teal); }
+    .auth-btn { width: 100%; padding: 11px; border-radius: 9px; background: #10a37f; border: none; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-top: 4px; }
+    .auth-btn:hover { background: #0d8a6a; }
+    .auth-divider { text-align: center; font-size: 11px; color: var(--text3); margin: 14px 0; position: relative; }
+    .auth-divider::before, .auth-divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 0.5px; background: var(--border); }
+    .auth-divider::before { left: 0; }
+    .auth-divider::after  { right: 0; }
+    .google-btn { width: 100%; padding: 10px; border-radius: 9px; background: var(--bg3); border: 0.5px solid var(--border2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s; }
+    .google-btn:hover { background: var(--teal-glow); }
+    .auth-switch { text-align: center; font-size: 12px; color: var(--text3); margin-top: 18px; }
+    .auth-switch span { color: var(--teal); cursor: pointer; font-weight: 600; }
+    .auth-switch span:hover { text-decoration: underline; }
+    .auth-error { font-size: 11px; color: var(--danger); text-align: center; margin-top: 8px; min-height: 16px; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Login Screen ── -->
+<div class="auth-screen" id="loginScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><i class="ti ti-dna-2"></i></div>
+      <div class="auth-title">ONCO AI</div>
+      <div class="auth-sub">Sign in to your account</div>
+    </div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com" />
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') submitLogin()" />
+    </div>
+    <button class="auth-btn" onclick="submitLogin()">Sign In</button>
+    <div class="auth-error" id="loginError"></div>
+    <div class="auth-divider">or</div>
+    <button class="google-btn" onclick="googleLogin()">
+      <svg width="16" height="16" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.5 30.2 0 24 0 14.6 0 6.6 5.4 2.5 13.3l7.8 6C12.3 13 17.7 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17z"/>
+        <path fill="#FBBC05" d="M10.3 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l7.8-6z"/>
+        <path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.7-4.3-13.7-10l-7.8 6C6.6 42.6 14.6 48 24 48z"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div class="auth-switch">Don't have an account? <span onclick="showRegister()">Register</span></div>
+  </div>
+</div>
+
+<!-- ── Register Screen ── -->
+<div class="auth-screen" id="registerScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><i class="ti ti-dna-2"></i></div>
+      <div class="auth-title">ONCO AI</div>
+      <div class="auth-sub">Create your account</div>
+    </div>
+    <div class="auth-field">
+      <label>Full Name</label>
+      <input type="text" id="registerName" placeholder="Your name" />
+    </div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="registerEmail" placeholder="you@example.com" />
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="registerPassword" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') submitRegister()" />
+    </div>
+    <button class="auth-btn" onclick="submitRegister()">Create Account</button>
+    <div class="auth-error" id="registerError"></div>
+    <div class="auth-divider">or</div>
+    <button class="google-btn" onclick="googleLogin()">
+      <svg width="16" height="16" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.5 30.2 0 24 0 14.6 0 6.6 5.4 2.5 13.3l7.8 6C12.3 13 17.7 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17z"/>
+        <path fill="#FBBC05" d="M10.3 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l7.8-6z"/>
+        <path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.7-4.3-13.7-10l-7.8 6C6.6 42.6 14.6 48 24 48z"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div class="auth-switch">Already have an account? <span onclick="showLogin()">Sign In</span></div>
+  </div>
+</div>
+
+<div class="shell">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <img src="data:image/png;base64,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" alt="ONCO AI" style="width:34px;height:34px;object-fit:cover;flex-shrink:0;">
+    <div>
+      <div class="topbar-title">ONCO AI</div>
+      <div class="topbar-sub">Evidence-based · RAG-powered</div>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle light / dark mode">
+        <i class="ti ti-moon" id="themeIcon"></i>
+      </button>
+      <div class="user-chip" id="userChip" style="display:none;">
+        <i class="ti ti-user"></i>
+        <span id="userName"></span>
+      </div>
+      <button class="logout-btn" id="logoutBtn" style="display:none;" onclick="logout()">Sign out</button>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span>Live</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Navigation</div>
+        <div class="nav-item active" id="nav-chat" onclick="showView('chat')">
+          <i class="ti ti-message-2"></i> Ask a question
+        </div>
+        <div class="nav-item" id="nav-history" onclick="showView('history')">
+          <i class="ti ti-history"></i> History
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="sidebar-section" style="padding-bottom:0;">
+        <div class="sidebar-label">Sources active</div>
+        <div class="source-card">
+          <div class="source-card-header" onclick="toggleSource('pubmed')">
+            <span class="source-dot dot-green"></span>
+            <i class="ti ti-book" style="font-size:13px;color:var(--text2);"></i>
+            <span class="source-card-title">PubMed</span>
+            <i class="ti ti-chevron-down source-chevron" id="chev-pubmed"></i>
+          </div>
+          <div class="source-card-body" id="body-pubmed" style="display:none;">
+            <div class="source-stat"><i class="ti ti-database"></i> NCBI / NLM database</div>
+            <div class="source-stat"><i class="ti ti-file-text"></i> 36M+ indexed articles</div>
+            <div class="source-stat"><i class="ti ti-refresh"></i> Live API · real-time</div>
+            <div class="source-tag">Peer-reviewed research</div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header" onclick="toggleSource('nccn')">
+            <span class="source-dot dot-teal"></span>
+            <i class="ti ti-stethoscope" style="font-size:13px;color:var(--text2);"></i>
+            <span class="source-card-title">NCCN Guidelines</span>
+            <i class="ti ti-chevron-down source-chevron" id="chev-nccn"></i>
+          </div>
+          <div class="source-card-body" id="body-nccn" style="display:none;">
+            <div class="source-stat" style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Indexed PDFs</div>
+            <div id="nccn-file-list"><div class="source-stat" style="color:var(--text3);font-style:italic;">Loading…</div></div>
+            <div class="source-tag" style="margin-top:6px;">Local vector index · BM25</div>
+          </div>
+        </div>
+        <div class="source-card">
+          <div class="source-card-header" onclick="toggleSource('trials')">
+            <span class="source-dot dot-purple"></span>
+            <i class="ti ti-test-pipe" style="font-size:13px;color:var(--text2);"></i>
+            <span class="source-card-title">ClinicalTrials.gov</span>
+            <i class="ti ti-chevron-down source-chevron" id="chev-trials"></i>
+          </div>
+          <div class="source-card-body" id="body-trials" style="display:none;">
+            <div class="source-stat"><i class="ti ti-world"></i> US NIH registry</div>
+            <div class="source-stat"><i class="ti ti-clipboard-list"></i> 500K+ registered trials</div>
+            <div class="source-stat"><i class="ti ti-refresh"></i> Live API v2 · real-time</div>
+            <div class="source-tag">Global trial registry</div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div id="history-sidebar" style="display:none;flex:1;overflow-y:auto;">
+        <div class="sidebar-label" style="padding:0 20px;margin-bottom:6px;">Recent</div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">No questions yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat view -->
+    <div class="chat-area" id="view-chat">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon"><i class="ti ti-dna-2"></i></div>
+        <h2>ONCO AI</h2>
+        <p>Ask any cancer-related question. I search NCCN guidelines, PubMed research, and ClinicalTrials.gov to give you evidence-based answers with citations.</p>
+        <div class="welcome-chips">
+          <div class="chip" onclick="askSample(this)">What is HER2-low metastatic breast cancer?</div>
+          <div class="chip" onclick="askSample(this)">How is pancreatic cancer treated?</div>
+          <div class="chip" onclick="askSample(this)">What are KRAS G12C inhibitors?</div>
+          <div class="chip" onclick="askSample(this)">What are the stages of colon cancer?</div>
+          <div class="chip" onclick="askSample(this)">Latest immunotherapy for lung cancer</div>
+          <div class="chip" onclick="askSample(this)">What is CLL and how is it treated?</div>
+        </div>
+      </div>
+      <div class="messages" id="messages" style="display:none;"></div>
+      <div class="input-bar">
+        <div class="input-row">
+          <div class="input-wrap">
+            <button class="attach-btn" title="Attach PDF" onclick="document.getElementById('pdfUpload').click()">
+              <i class="ti ti-paperclip"></i>
+            </button>
+            <input type="file" id="pdfUpload" accept="application/pdf,.pdf" multiple hidden onchange="uploadPdfs(event)" />
+            <input type="text" id="userInput" placeholder="Ask an oncology question…" onkeydown="if(event.key==='Enter') sendMessage()" />
+          </div>
+          <button class="send-btn" title="Send" onclick="sendMessage()">
+            <i class="ti ti-arrow-up"></i>
+          </button>
+        </div>
+        <div class="upload-status" id="uploadStatus"></div>
+        <div class="disclaimer">For clinical reference only · Not a substitute for professional medical judgment</div>
+      </div>
+    </div>
+
+    <!-- History view -->
+    <div class="chat-area" id="view-history" style="display:none;align-items:center;justify-content:center;">
+      <div style="text-align:center;color:var(--text3);padding:40px;width:100%;max-width:680px;">
+        <i class="ti ti-history" style="font-size:40px;opacity:0.3;"></i>
+        <p style="margin-top:12px;font-size:13px;" id="history-empty-msg">No history yet. Ask a question first.</p>
+        <div id="history-cards" style="margin-top:24px;display:flex;flex-direction:column;gap:12px;text-align:left;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+let authToken = null;
+let isDark = true;
+
+// ── Theme ──────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeIcon').className = isDark ? 'ti ti-moon' : 'ti ti-sun';
+}
+
+// ── Auth screens ───────────────────────────────────────────────────────────
+function showLogin() {
+  document.getElementById('loginScreen').style.display    = 'flex';
+  document.getElementById('registerScreen').style.display = 'none';
+  document.getElementById('loginError').textContent       = '';
+}
+
+function showRegister() {
+  document.getElementById('registerScreen').style.display = 'flex';
+  document.getElementById('loginScreen').style.display    = 'none';
+  document.getElementById('registerError').textContent    = '';
+}
+
+function hideAuthScreens(userName) {
+  document.getElementById('loginScreen').style.display    = 'none';
+  document.getElementById('registerScreen').style.display = 'none';
+  document.getElementById('userChip').style.display       = 'flex';
+  document.getElementById('logoutBtn').style.display      = 'block';
+  document.getElementById('userName').textContent         = userName;
+  loadHistory();
+  loadNccnFiles();
+}
+
+// ── Login ──────────────────────────────────────────────────────────────────
+async function submitLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl    = document.getElementById('loginError');
+  errEl.textContent = '';
+  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; return; }
+  try {
+    const res  = await fetch(`${API}/login`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.detail || 'Login failed.'; return; }
+    authToken = data.access_token;
+    hideAuthScreens(data.user_name);
+  } catch { errEl.textContent = 'Cannot reach server. Is FastAPI running?'; }
+}
+
+// ── Register ───────────────────────────────────────────────────────────────
+async function submitRegister() {
+  const name     = document.getElementById('registerName').value.trim();
+  const email    = document.getElementById('registerEmail').value.trim();
+  const password = document.getElementById('registerPassword').value;
+  const errEl    = document.getElementById('registerError');
+  errEl.textContent = '';
+  if (!name || !email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  try {
+    const res  = await fetch(`${API}/register`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.detail || 'Registration failed.'; return; }
+    authToken = data.access_token;
+    hideAuthScreens(data.user_name);
+  } catch { errEl.textContent = 'Cannot reach server. Is FastAPI running?'; }
+}
+
+// ── Google login ───────────────────────────────────────────────────────────
+function googleLogin() { window.location.href = `${API}/auth/google`; }
+
+function checkUrlToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+  if (token) {
+    authToken = token;
+    window.history.replaceState({}, '', window.location.pathname);
+    fetch(`${API}/history`, { headers: { 'Authorization': `Bearer ${authToken}` } })
+      .then(r => r.json()).then(data => hideAuthScreens(data.user || 'User'));
+  }
+}
+
+// ── Logout ─────────────────────────────────────────────────────────────────
+function logout() {
+  authToken = null;
+  sessionHistory.length = 0;
+  document.getElementById('userChip').style.display  = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('messages').innerHTML      = '';
+  document.getElementById('messages').style.display  = 'none';
+  document.getElementById('welcome').style.display   = 'flex';
+  showLogin();
+}
+
+// ── Load history from server ───────────────────────────────────────────────
+async function loadHistory() {
+  if (!authToken) return;
+  try {
+    const res  = await fetch(`${API}/history`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const data = await res.json();
+    (data.history || []).forEach(r => {
+      sessionHistory.push({ question: r.question, answer: r.answer, confidence: r.confidence, citations: 0 });
+    });
+  } catch { /* silent */ }
+}
+
+// ── Session history ────────────────────────────────────────────────────────
+const sessionHistory = [];
+
+function showView(view) {
+  document.getElementById('view-chat').style.display    = view === 'chat'    ? 'flex' : 'none';
+  document.getElementById('view-history').style.display = view === 'history' ? 'flex' : 'none';
+  document.getElementById('history-sidebar').style.display = view === 'history' ? 'block' : 'none';
+  document.getElementById('nav-chat').classList.toggle('active',    view === 'chat');
+  document.getElementById('nav-history').classList.toggle('active', view === 'history');
+  if (view === 'history') renderHistoryView();
+}
+
+function renderHistoryView() {
+  const list  = document.getElementById('historyList');
+  const cards = document.getElementById('history-cards');
+  const empty = document.getElementById('history-empty-msg');
+  if (sessionHistory.length === 0) {
+    list.innerHTML = '<div class="history-empty">No questions yet.</div>';
+    cards.innerHTML = ''; empty.style.display = 'block'; return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = sessionHistory.map((h, i) =>
+    `<div class="history-item" onclick="replayHistory(${i})" title="${escapeHtml(h.question)}">${escapeHtml(h.question)}</div>`
+  ).join('');
+  cards.innerHTML = sessionHistory.slice().reverse().map(h => `
+    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">${escapeHtml(h.question)}</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.6;">${escapeHtml(h.answer.slice(0,200))}${h.answer.length>200?'…':''}</div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text3);">${h.confidence} confidence</div>
+    </div>`).join('');
+}
+
+function replayHistory(i) {
+  showView('chat');
+  document.getElementById('userInput').value = sessionHistory[i].question;
+  sendMessage();
+}
+
+function askSample(el) {
+  document.getElementById('userInput').value = el.textContent;
+  sendMessage();
+}
+
+// ── Strip citation markers ─────────────────────────────────────────────────
+function stripInlineCitations(text) {
+  return text
+    .replace(/\[NCCN[^\]]*\]/gi, '').replace(/\[PubMed[^\]]*\]/gi, '')
+    .replace(/\[\s*[Ss]ource[^\]]*\]/g, '').replace(/\[\s*\d+\s*\]/g, '')
+    .replace(/  +/g, ' ').trim();
+}
+
+// ── Typewriter ─────────────────────────────────────────────────────────────
+function typewriterStream(el, text, baseDelay = 5) {
+  return new Promise(resolve => {
+    const clean = stripInlineCitations(text);
+    const chars = clean.split('');
+    let i = 0, displayed = '';
+    function next() {
+      if (i >= chars.length) { resolve(); return; }
+      const burst = Math.min(3, chars.length - i);
+      for (let b = 0; b < burst; b++) displayed += chars[i++];
+      el.innerHTML = formatAnswer(displayed) + '<span class="cursor">▋</span>';
+      const last = displayed.trimEnd().slice(-1);
+      const isPause = last === '.' || last === '!' || last === '?';
+      const msgs = document.getElementById('messages');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+      setTimeout(next, isPause ? 60 : baseDelay);
+    }
+    next();
+  });
+}
+
+// ── Send message ───────────────────────────────────────────────────────────
+async function sendMessage() {
+  const input    = document.getElementById('userInput');
+  const question = input.value.trim();
+  if (!question) return;
+  input.value = '';
+
+  document.getElementById('welcome').style.display  = 'none';
+  document.getElementById('messages').style.display = 'flex';
+  const messages = document.getElementById('messages');
+
+  const userDiv = document.createElement('div');
+  userDiv.className = 'msg-user';
+  userDiv.innerHTML = `<div class="bubble">${escapeHtml(question)}</div>`;
+  messages.appendChild(userDiv);
+
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'msg-ai';
+  typingDiv.innerHTML = `
+    <div class="ai-header">
+      <div class="ai-avatar"><i class="ti ti-dna-2" style="font-size:12px"></i></div>
+      <span class="ai-name">ONCO AI</span>
+    </div>
+    <div class="answer-card">
+      <div class="answer-body"><div class="typing"><span></span><span></span><span></span></div></div>
+    </div>`;
+  messages.appendChild(typingDiv);
+  messages.scrollTop = messages.scrollHeight;
+
+  try {
+    const res = await fetch(`${API}/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ question })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `Backend returned ${res.status}`);
+    }
+    const data = await res.json();
+    const confidence = (data.confidence || 'low').toLowerCase();
+    const badgeClass = confidence === 'high' ? 'badge-high' : 'badge-mid';
+    const badgeIcon  = confidence === 'high' ? 'ti-circle-check' : 'ti-alert-triangle';
+
+    const citationsHtml = (data.citations && data.citations.length)
+      ? data.citations.map(c => {
+          const icon = c.type === 'pubmed' ? 'ti-book' : c.type === 'trial' ? 'ti-test-pipe' : 'ti-file-certificate';
+          let titleHtml;
+          if (c.type === 'pdf' && c.title) {
+            const match = c.title.match(/^(.+\.pdf)[^\d]*(\d+)$/i);
+            if (match) {
+              const pdfUrl = `${API}/pdf/${encodeURIComponent(match[1].trim())}#page=${match[2]}`;
+              titleHtml = `<a href="${pdfUrl}" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none;">${escapeHtml(c.title)}</a>`;
+            } else { titleHtml = escapeHtml(c.title); }
+          } else if (c.url) {
+            titleHtml = `<a href="${c.url}" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none;">${escapeHtml(c.title)}</a>`;
+          } else { titleHtml = escapeHtml(c.title); }
+          return `<div><div class="cite-item"><i class="ti ${icon}"></i>${titleHtml}</div>${c.source?`<div class="cite-src">${escapeHtml(c.source)}</div>`:''}</div>`;
+        }).join('')
+      : '<div style="font-size:12px;color:var(--text3)">No citations returned.</div>';
+
+    typingDiv.innerHTML = `
+      <div class="ai-header">
+        <div class="ai-avatar"><i class="ti ti-dna-2" style="font-size:12px"></i></div>
+        <span class="ai-name">ONCO AI</span>
+      </div>
+      <div class="answer-card">
+        <div class="answer-body" id="stream-target"></div>
+      </div>`;
+
+    const streamTarget = typingDiv.querySelector('#stream-target');
+    await typewriterStream(streamTarget, data.answer || '');
+    streamTarget.innerHTML = formatAnswer(stripInlineCitations(data.answer || ''));
+
+    const tail = document.createElement('div');
+    tail.style.opacity = '0'; tail.style.transition = 'opacity 0.5s ease';
+    tail.innerHTML = `
+      <div class="citations">
+        <div class="cite-label">Sources</div>
+        ${citationsHtml}
+      </div>
+      <div class="meta-row">
+        <span class="badge ${badgeClass}"><i class="ti ${badgeIcon}"></i> ${capitalize(confidence)} confidence</span>
+        <span class="meta-sep">·</span>
+        ${data.validated
+          ? `<span class="badge badge-validated"><i class="ti ti-shield-check"></i> Evidence validated</span>`
+          : `<span class="badge" style="background:rgba(245,101,101,0.1);color:var(--danger);"><i class="ti ti-shield-x"></i> Not validated</span>`}
+        <span class="source-count">${(data.citations||[]).length} sources</span>
+      </div>`;
+    typingDiv.querySelector('.answer-card').appendChild(tail);
+    requestAnimationFrame(() => requestAnimationFrame(() => tail.style.opacity = '1'));
+
+    sessionHistory.push({ question, answer: data.answer || '', confidence: data.confidence || 'low', citations: (data.citations||[]).length });
+
+  } catch (err) {
+    typingDiv.innerHTML = `
+      <div class="ai-header">
+        <div class="ai-avatar"><i class="ti ti-dna-2" style="font-size:12px"></i></div>
+        <span class="ai-name">ONCO AI</span>
+      </div>
+      <div class="answer-card">
+        <div class="answer-body" style="color:var(--danger);">
+          <i class="ti ti-alert-circle"></i> ${escapeHtml(err.message || 'Could not reach the backend.')}
+        </div>
+      </div>`;
+  }
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// ── Upload PDFs ────────────────────────────────────────────────────────────
+async function uploadPdfs(event) {
+  const files  = Array.from(event.target.files || []);
+  const status = document.getElementById('uploadStatus');
+  if (!files.length) return;
+  status.className = 'upload-status';
+  status.textContent = `Uploading ${files.length} PDF${files.length>1?'s':''}…`;
+  const formData = new FormData();
+  files.forEach(f => formData.append('files', f));
+  try {
+    const res  = await fetch(`${API}/upload`, {
+      method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }, body: formData
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || 'Upload failed');
+    status.className   = 'upload-status ok';
+    status.textContent = `Indexed ${data.indexed_files.length} PDF(s): ${data.chunks} chunks.`;
+  } catch (err) {
+    status.className   = 'upload-status err';
+    status.textContent = err.message || 'Upload failed.';
+  } finally { event.target.value = ''; }
+}
+
+// ── Source card toggle ─────────────────────────────────────────────────────
+function toggleSource(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'flex';
+  body.style.flexDirection = 'column';
+  if (chev) chev.classList.toggle('open', !isOpen);
+}
+
+// ── NCCN file list ─────────────────────────────────────────────────────────
+async function loadNccnFiles() {
+  try {
+    const res  = await fetch(`${API}/health`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const files = data.indexed_files || [];
+    const el = document.getElementById('nccn-file-list');
+    if (!el) return;
+    if (files.length === 0) {
+      el.innerHTML = '<div class="source-stat" style="color:var(--text3);font-style:italic;">No PDFs indexed yet</div>'; return;
+    }
+    const NCCN_NAMES = {
+      'breast':'Breast Cancer — Invasive','breast-metastatic':'Breast Cancer — Metastatic',
+      'nsclc':'Lung Cancer — Non-Small Cell','sclc':'Lung Cancer — Small Cell',
+      'colon':'Colon Cancer','prostate':'Prostate Cancer','ovarian':'Ovarian Cancer',
+      'cervical':'Cervical Cancer','pancreatic':'Pancreatic Cancer','stomach':'Stomach Cancer',
+      'liver-hp':'Liver Cancer','melanoma':'Melanoma — Skin','cll':'Chronic Lymphocytic Leukemia',
+      'cml':'Chronic Myeloid Leukemia','hodgkin':'Hodgkin Lymphoma','dlbcl':'Diffuse Large B-Cell Lymphoma',
+      'myeloma':'Multiple Myeloma','all':'Acute Lymphoblastic Leukemia','thyroid':'Thyroid Cancer','bladder':'Bladder Cancer',
+    };
+    function prettify(name) {
+      const match = name.match(/^NCCN_(.+?)(?:_patient)?\.pdf$/i);
+      const slug = match ? match[1].toLowerCase() : name.toLowerCase().replace(/\.pdf$/i,'');
+      return NCCN_NAMES[slug] || slug.replace(/-/g,' ').replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+    el.innerHTML = files.map(f =>
+      `<a class="nccn-file" href="${API}/pdf/${encodeURIComponent(f)}" target="_blank" rel="noopener">
+        <i class="ti ti-file-certificate"></i><span>${prettify(f)}</span>
+        <i class="ti ti-external-link" style="font-size:9px;margin-left:auto;opacity:0.5;"></i>
+      </a>`).join('');
+  } catch {
+    const el = document.getElementById('nccn-file-list');
+    if (el) el.innerHTML = '<div class="source-stat" style="color:var(--text3);font-style:italic;">Server offline</div>';
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function formatAnswer(text) {
+  const escaped = escapeHtml(text);
+  const lines = escaped.split('\n');
+  let html = '', inList = false;
+  for (let line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) { if (inList) { html += '</ul>'; inList = false; } html += '<br>'; continue; }
+    const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*');
+    if (isBullet) {
+      if (!inList) { html += '<ul style="margin:8px 0 8px 16px;display:flex;flex-direction:column;gap:5px;">'; inList = true; }
+      html += `<li style="line-height:1.6;">${trimmed.replace(/^[•\-\*]\s*/, '')}</li>`;
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += `<p style="margin:4px 0;">${trimmed}</p>`;
+    }
+  }
+  if (inList) html += '</ul>';
+  return html;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ── Init ───────────────────────────────────────────────────────────────────
+checkUrlToken();
+</script>
+
+</body>
+</html>

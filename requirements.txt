@@ -1,0 +1,47 @@
+# Oncology AI Assistant — backend dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Web framework ─────────────────────────────────────────────────────────────
+fastapi
+uvicorn[standard]
+pydantic
+
+# ── Environment / config ──────────────────────────────────────────────────────
+python-dotenv
+
+# ── LLM client ────────────────────────────────────────────────────────────────
+groq
+
+# ── Vector store ──────────────────────────────────────────────────────────────
+qdrant-client
+
+# ── Embeddings ────────────────────────────────────────────────────────────────
+# sentence-transformers is optional — embedder.py falls back to a deterministic
+# hashed embedding if it isn't installed, so the app still runs without it.
+# Install it for real semantic search quality.
+sentence-transformers
+
+# ── Keyword search ────────────────────────────────────────────────────────────
+rank-bm25
+
+# ── PDF parsing ───────────────────────────────────────────────────────────────
+PyMuPDF
+
+# ── HTTP calls (PubMed, ClinicalTrials.gov, NCCN guideline downloader) ────────
+requests
+
+# ── Authentication ────────────────────────────────────────────────────────────
+# JWT token creation and verification (used in auth.py)
+python-jose[cryptography]
+
+# Password hashing with bcrypt (used in auth.py via CryptContext)
+passlib[bcrypt]
+
+# Google OAuth 2.0 login flow (used in auth.py via authlib)
+authlib
+
+# Async HTTP client required internally by authlib for OAuth token exchange
+httpx
+
+# Session middleware for storing OAuth state between requests (used in main.py)
+itsdangerous
