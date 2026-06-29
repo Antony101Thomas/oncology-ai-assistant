@@ -27,6 +27,7 @@ PyMuPDF
 
 # ── HTTP calls ────────────────────────────────────────────────────────────────
 requests
+python-multipart
 
 # ── Authentication ────────────────────────────────────────────────────────────
 python-jose[cryptography]
