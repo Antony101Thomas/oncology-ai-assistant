@@ -16,10 +16,8 @@ groq
 qdrant-client
 
 # ── Embeddings ────────────────────────────────────────────────────────────────
-# sentence-transformers is optional — embedder.py falls back to a deterministic
-# hashed embedding if it isn't installed, so the app still runs without it.
-# Install it for real semantic search quality.
-sentence-transformers
+# sentence-transformers intentionally excluded on Render free tier (512MB limit)
+# embedder.py automatically falls back to lightweight hash embeddings instead
 
 # ── Keyword search ────────────────────────────────────────────────────────────
 rank-bm25
@@ -27,21 +25,13 @@ rank-bm25
 # ── PDF parsing ───────────────────────────────────────────────────────────────
 PyMuPDF
 
-# ── HTTP calls (PubMed, ClinicalTrials.gov, NCCN guideline downloader) ────────
+# ── HTTP calls ────────────────────────────────────────────────────────────────
 requests
 
 # ── Authentication ────────────────────────────────────────────────────────────
-# JWT token creation and verification (used in auth.py)
 python-jose[cryptography]
-
-# Password hashing with bcrypt (used in auth.py via CryptContext)
 passlib[bcrypt]
-
-# Google OAuth 2.0 login flow (used in auth.py via authlib)
 authlib
-
-# Async HTTP client required internally by authlib for OAuth token exchange
 httpx
-
-# Session middleware for storing OAuth state between requests (used in main.py)
 itsdangerous
+sqlalchemy
