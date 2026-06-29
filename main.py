@@ -31,6 +31,8 @@ DEFAULT_PDF    = APP_DIR / "test.pdf"
 COLLECTION     = "oncology_docs"
 VECTOR_SIZE    = 384
 
+FRONTEND_URL = "https://antony101thomas.github.io/oncology-ai-assistant/oncology_ui.html"
+
 app    = FastAPI(title="ONCO AI")
 qdrant = QdrantClient(":memory:")
 
@@ -172,7 +174,8 @@ def login(req: LoginRequest):
 @app.get("/auth/google")
 async def google_login(request: Request):
     return await oauth.google.authorize_redirect(
-        request, os.getenv("GOOGLE_REDIRECT_URI", "http://127.0.0.1:8000/auth/callback")
+        request, os.getenv("GOOGLE_REDIRECT_URI",
+        "https://onco-ai-api.onrender.com/auth/callback")
     )
 
 
@@ -194,9 +197,7 @@ async def google_callback(request: Request):
             )
 
     token = create_token(user["id"])
-    return RedirectResponse(
-        url=f"http://127.0.0.1:5500/oncology_ui.html?token={token}"
-    )
+    return RedirectResponse(url=f"{FRONTEND_URL}?token={token}")
 
 
 @app.get("/history")
@@ -284,7 +285,6 @@ def ask_question(request: QuestionRequest,
         indexed_chunks=indexed_chunks,
     )
 
-    # Save to user's history
     save_chat(
         user_id=current_user["id"],
         question=request.question,
