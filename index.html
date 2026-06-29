@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oncology AI — by Antony Thomas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080c14;
+      --bg2:       #0e1521;
+      --teal:      #38bdf8;
+      --teal2:     #0ea5e9;
+      --violet:    #818cf8;
+      --green:     #34d399;
+      --text:      #e2e8f0;
+      --text2:     #94a3b8;
+      --text3:     #475569;
+      --border:    rgba(56,189,248,0.12);
+      --border2:   rgba(56,189,248,0.22);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px; font-weight: 700; color: var(--text);
+      text-decoration: none;
+    }
+    .logo-mark {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, #0369a1, #38bdf8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      color: var(--text2); text-decoration: none; font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      padding: 8px 18px; border-radius: 8px;
+      background: var(--teal2); color: #fff !important;
+      font-weight: 600; font-size: 14px;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--teal) !important; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: flex-start; justify-content: center;
+      padding: 120px 40px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Grid background */
+    .hero::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow blob */
+    .hero::after {
+      content: '';
+      position: fixed; top: -200px; left: -100px;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(56,189,248,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .hero-content { position: relative; z-index: 1; }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(56,189,248,0.08);
+      border: 0.5px solid var(--border2);
+      border-radius: 20px;
+      padding: 5px 14px; margin-bottom: 28px;
+      font-size: 12px; color: var(--teal); font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+    .hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); display: inline-block; animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .hero-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(36px, 5.5vw, 68px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+    .hero-headline .by-line {
+      font-size: clamp(14px, 1.5vw, 18px);
+      color: var(--text3);
+      font-weight: 400;
+      display: block;
+      letter-spacing: 0;
+      margin-top: 6px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Animated word */
+    .hero-animated-line {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(36px, 5.5vw, 68px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .static-word { color: #f1f5f9; }
+    .animated-word-wrap {
+      position: relative;
+      display: inline-block;
+      min-width: 340px;
+      height: 1.15em;
+      overflow: hidden;
+    }
+    .aword {
+      position: absolute; top: 0; left: 0;
+      background: linear-gradient(90deg, var(--teal), var(--violet));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      white-space: nowrap;
+    }
+    .aword.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .aword.exit {
+      opacity: 0;
+      transform: translateY(-40px);
+    }
+
+    .hero-sub {
+      max-width: 560px;
+      font-size: 16px; color: var(--text2);
+      line-height: 1.75;
+      margin-bottom: 40px;
+    }
+
+    .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 13px 28px; border-radius: 9px;
+      background: var(--teal2); color: #fff;
+      font-weight: 600; font-size: 15px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover { background: var(--teal); transform: translateY(-1px); }
+    .btn-secondary {
+      padding: 13px 28px; border-radius: 9px;
+      background: transparent; color: var(--text);
+      font-weight: 600; font-size: 15px;
+      text-decoration: none; cursor: pointer;
+      border: 0.5px solid var(--border2);
+      transition: background 0.2s, transform 0.15s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-secondary:hover { background: rgba(56,189,248,0.07); transform: translateY(-1px); }
+
+    /* Terminal card */
+    .hero-right {
+      position: absolute; right: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 380px;
+      display: none;
+    }
+    @media(min-width:900px) { .hero-right { display: block; } }
+
+    .terminal {
+      background: var(--bg2);
+      border: 0.5px solid var(--border2);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+    .terminal-bar {
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 0.5px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #f87171; } .dot-y { background: #fbbf24; } .dot-g { background: var(--green); }
+    .terminal-title { margin-left: auto; font-size: 11px; color: var(--text3); }
+    .terminal-body { padding: 20px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; }
+    .t-comment { color: var(--text3); }
+    .t-key { color: var(--violet); }
+    .t-val { color: var(--green); }
+    .t-prompt { color: var(--teal); }
+    .t-line { display: block; }
+    .t-cursor { display: inline-block; width: 8px; height: 14px; background: var(--teal); vertical-align: middle; animation: blink 1s infinite; }
+    @keyframes blink { 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
+
+    /* ── STATS ── */
+    .stats-band {
+      position: relative; z-index: 1;
+      border-top: 0.5px solid var(--border);
+      border-bottom: 0.5px solid var(--border);
+      background: rgba(14,21,33,0.6);
+      padding: 32px 40px;
+      display: flex; justify-content: center; gap: 60px; flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px; font-weight: 700; color: var(--teal);
+    }
+    .stat-label { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    /* ── FEATURES ── */
+    .section {
+      max-width: 1100px; margin: 0 auto;
+      padding: 100px 40px;
+      position: relative; z-index: 1;
+    }
+    .section-label {
+      font-size: 11px; color: var(--teal); letter-spacing: 0.1em;
+      text-transform: uppercase; font-weight: 600; margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(26px, 3.5vw, 42px);
+      font-weight: 700; line-height: 1.2;
+      letter-spacing: -0.02em; color: #f1f5f9;
+      margin-bottom: 16px;
+    }
+    .section-sub { font-size: 16px; color: var(--text2); max-width: 520px; line-height: 1.7; }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px; margin-top: 56px;
+    }
+    .feature-card {
+      background: var(--bg2);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 26px;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+    }
+    .feature-card:hover {
+      border-color: var(--border2);
+      box-shadow: 0 8px 40px rgba(56,189,248,0.08);
+      transform: translateY(-3px);
+    }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 16px;
+    }
+    .icon-teal  { background: rgba(56,189,248,0.1); }
+    .icon-violet{ background: rgba(129,140,248,0.1); }
+    .icon-green { background: rgba(52,211,153,0.1); }
+    .icon-amber { background: rgba(251,191,36,0.1); }
+
+    .feature-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
+    .feature-desc  { font-size: 13.5px; color: var(--text2); line-height: 1.65; }
+
+    /* ── HOW IT WORKS ── */
+    .how-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0; margin-top: 56px;
+    }
+    .step {
+      padding: 32px 28px;
+      border-right: 0.5px solid var(--border);
+      position: relative;
+    }
+    .step:last-child { border-right: none; }
+    .step-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 48px; font-weight: 700;
+      color: rgba(56,189,248,0.12);
+      line-height: 1; margin-bottom: 14px;
+    }
+    .step-title { font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
+    .step-desc  { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+    /* ── PIPELINE VISUAL ── */
+    .pipeline {
+      margin: 56px 0 0;
+      background: var(--bg2);
+      border: 0.5px solid var(--border);
+      border-radius: 16px; padding: 32px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; flex-wrap: wrap;
+    }
+    .pipe-node {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px; min-width: 90px;
+    }
+    .pipe-box {
+      width: 72px; height: 72px; border-radius: 14px;
+      border: 0.5px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      background: rgba(56,189,248,0.05);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .pipe-node:hover .pipe-box { background: rgba(56,189,248,0.12); transform: scale(1.06); }
+    .pipe-label { font-size: 11px; color: var(--text3); text-align: center; font-weight: 500; }
+    .pipe-arrow { font-size: 18px; color: var(--text3); margin: 0 6px; padding-bottom: 20px; }
+
+    /* ── CREATOR CARD ── */
+    .creator-section {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 40px 100px;
+      position: relative; z-index: 1;
+    }
+    .creator-card {
+      background: var(--bg2);
+      border: 0.5px solid var(--border);
+      border-radius: 20px;
+      padding: 48px;
+      display: flex; gap: 40px; align-items: center; flex-wrap: wrap;
+    }
+    .creator-avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, #0369a1, var(--violet));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .creator-info { flex: 1; min-width: 220px; }
+    .creator-name { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #f1f5f9; }
+    .creator-role { font-size: 14px; color: var(--teal); margin: 4px 0 12px; font-weight: 500; }
+    .creator-bio  { font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 500px; }
+
+    /* ── CTA ── */
+    .cta-section {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 40px 120px;
+      position: relative; z-index: 1;
+    }
+    .cta-card {
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(3,105,161,0.25), rgba(129,140,248,0.15));
+      border: 0.5px solid rgba(56,189,248,0.2);
+      padding: 64px 48px;
+      text-align: center;
+    }
+    .cta-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(24px, 3vw, 40px);
+      font-weight: 700; color: #f1f5f9;
+      line-height: 1.2; margin-bottom: 16px;
+    }
+    .cta-sub { font-size: 16px; color: var(--text2); margin-bottom: 36px; }
+    .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 0.5px solid var(--border);
+      padding: 28px 40px;
+      text-align: center;
+      font-size: 13px; color: var(--text3);
+      position: relative; z-index: 1;
+    }
+    footer strong { color: var(--text2); }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 640px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 20px 60px; }
+      .stats-band { gap: 32px; padding: 24px 20px; }
+      .section, .creator-section, .cta-section { padding-left: 20px; padding-right: 20px; }
+      .creator-card { padding: 28px; }
+      .cta-card { padding: 36px 24px; }
+      .animated-word-wrap { min-width: 220px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-mark">🧬</div>
+    Oncology AI
+  </a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#about">About</a>
+    <a href="oncology_ui.html" class="nav-cta">Open Assistant →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="max-width:1100px;margin:0 auto;position:relative;">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span></span> Evidence-Based · Agentic RAG · Oncology-Focused
+      </div>
+
+      <h1 class="hero-headline">
+        The fastest path to<br>trusted answers for
+        <span class="by-line">built by Antony Thomas</span>
+      </h1>
+
+      <div class="hero-animated-line">
+        <span class="static-word">every</span>
+        <span class="animated-word-wrap">
+          <span class="aword active" id="w0">cancer question.</span>
+          <span class="aword" id="w1">clinical trial.</span>
+          <span class="aword" id="w2">treatment plan.</span>
+          <span class="aword" id="w3">research query.</span>
+          <span class="aword" id="w4">oncology decision.</span>
+        </span>
+      </div>
+
+      <p class="hero-sub">
+        An intelligent assistant that retrieves evidence from NCCN guidelines, PubMed research, and ClinicalTrials.gov — then generates cited, validated answers. Never hallucination. Always traceable.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="oncology_ui.html" class="btn-primary">Open the Assistant →</a>
+        <a href="#how" class="btn-secondary">See how it works</a>
+      </div>
+    </div>
+
+    <!-- Terminal card (desktop only) -->
+    <div class="hero-right">
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+          <span class="terminal-title">oncology-ai / response.json</span>
+        </div>
+        <div class="terminal-body">
+          <span class="t-line t-comment">// Real response from the system</span>
+          <span class="t-line">{</span>
+          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"confidence"</span>: <span class="t-val">"high"</span>,</span>
+          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"validated"</span>: <span class="t-val">true</span>,</span>
+          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"route"</span>: <span class="t-val">"conceptual"</span>,</span>
+          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"citations"</span>: [</span>
+          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="t-key">"type"</span>: <span class="t-val">"pdf"</span>,</span>
+          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"source"</span>: <span class="t-val">"NCCN Breast"</span> },</span>
+          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="t-key">"type"</span>: <span class="t-val">"pubmed"</span>,</span>
+          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"pmid"</span>: <span class="t-val">"35665782"</span> },</span>
+          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="t-key">"type"</span>: <span class="t-val">"trial"</span>,</span>
+          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"id"</span>: <span class="t-val">"NCT04494425"</span> }</span>
+          <span class="t-line">&nbsp;&nbsp;],</span>
+          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"refused"</span>: <span class="t-val">false</span></span>
+          <span class="t-line">} <span class="t-cursor"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-band reveal">
+  <div class="stat">
+    <div class="stat-num">20+</div>
+    <div class="stat-label">NCCN Guideline PDFs indexed</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">3</div>
+    <div class="stat-label">Trusted live sources</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">RAG</div>
+    <div class="stat-label">Agentic retrieval pipeline</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">0</div>
+    <div class="stat-label">Hallucinations tolerated</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section" id="features">
+  <div class="reveal">
+    <div class="section-label">Capabilities</div>
+    <h2 class="section-title">Everything evidence-based,<br>nothing invented.</h2>
+    <p class="section-sub">Every claim is traced back to a trusted source. If evidence isn't found, the assistant refuses to answer rather than guess.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon icon-teal">📚</div>
+      <div class="feature-title">Local PDF Retrieval</div>
+      <div class="feature-desc">Indexes NCCN, uploaded guidelines, and handbooks. Hybrid BM25 + vector search ensures no relevant passage is missed.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon icon-violet">🔬</div>
+      <div class="feature-title">PubMed Live Search</div>
+      <div class="feature-desc">Queries PubMed in real time for recent research articles and abstracts directly relevant to your oncology question.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon icon-green">🧪</div>
+      <div class="feature-title">ClinicalTrials.gov</div>
+      <div class="feature-desc">Finds active and recent clinical trials matching the condition or drug in your question — with status and NCT IDs.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon icon-amber">🛡️</div>
+      <div class="feature-title">Validator & Confidence</div>
+      <div class="feature-desc">Every answer is checked: numeric facts verified against sources, term overlap measured, and a confidence score assigned.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon icon-teal">🚦</div>
+      <div class="feature-title">Smart Query Router</div>
+      <div class="feature-desc">Classifies every question as conceptual, recency-seeking, or precision lookup — and picks the right retrieval strategy automatically.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon icon-violet">⛔</div>
+      <div class="feature-title">Principled Refusals</div>
+      <div class="feature-desc">When evidence is insufficient or the question is off-topic, the system refuses cleanly rather than generating unreliable content.</div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section" id="how" style="padding-top:0;">
+  <div class="reveal">
+    <div class="section-label">Pipeline</div>
+    <h2 class="section-title">From question to<br>cited answer in seconds.</h2>
+  </div>
+
+  <div class="pipeline reveal">
+    <div class="pipe-node">
+      <div class="pipe-box">❓</div>
+      <div class="pipe-label">Your question</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-box">🚦</div>
+      <div class="pipe-label">Route classify</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-box">🔍</div>
+      <div class="pipe-label">Hybrid retrieval</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-box">🌐</div>
+      <div class="pipe-label">Live APIs</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-box">🤖</div>
+      <div class="pipe-label">LLM synthesis</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-box">✅</div>
+      <div class="pipe-label">Validate & score</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-box">📋</div>
+      <div class="pipe-label">Cited answer</div>
+    </div>
+  </div>
+
+  <div class="how-grid reveal" style="margin-top:48px;background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;overflow:hidden;">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Ask in plain language</div>
+      <div class="step-desc">Type any oncology question. The router identifies whether you need a conceptual explanation, the latest evidence, or a specific trial.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Evidence is retrieved</div>
+      <div class="step-desc">The system searches indexed PDFs with semantic + keyword fusion, then calls PubMed and ClinicalTrials.gov live.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Answer is generated</div>
+      <div class="step-desc">The LLM synthesizes only from retrieved evidence, with every important claim tagged to its source.</div>
+    </div>
+    <div class="step" style="border-right:none;">
+      <div class="step-num">04</div>
+      <div class="step-title">Validated & delivered</div>
+      <div class="step-desc">A numeric guard and term-overlap check assigns a confidence level. Low evidence = polite refusal, not a hallucinated answer.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT / CREATOR -->
+<div class="creator-section" id="about">
+  <div class="creator-card reveal">
+    <div class="creator-avatar">AT</div>
+    <div class="creator-info">
+      <div class="creator-name">Antony Thomas</div>
+      <div class="creator-role">Creator · Oncology AI Assistant</div>
+      <p class="creator-bio">
+        This project was designed and built as part of an Agentic RAG assignment — with the goal of making oncology evidence accessible, safe, and always traceable. Every answer the system gives can be verified back to an NCCN guideline, a PubMed article, or a clinical trial entry. No guessing. No hallucination.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-card reveal">
+    <h2 class="cta-title">Ready to ask your first<br>oncology question?</h2>
+    <p class="cta-sub">Upload your own PDFs or use the pre-indexed NCCN guidelines — and get evidence-backed answers in seconds.</p>
+    <div class="cta-buttons">
+      <a href="oncology_ui.html" class="btn-primary">Open Oncology AI →</a>
+      <a href="#features" class="btn-secondary">Learn more</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  Built by <strong>Antony Thomas</strong> · Oncology AI Assistant · Evidence-Based · Agentic RAG
+  <br><span style="font-size:11px;margin-top:4px;display:block;">For clinical reference only — not a substitute for professional medical judgment.</span>
+</footer>
+
+<script>
+  // ── Animated words ──────────────────────────────────────────────────────────
+  const words = document.querySelectorAll('.aword');
+  let current = 0;
+  setInterval(() => {
+    words[current].classList.remove('active');
+    words[current].classList.add('exit');
+    setTimeout(() => words[current].classList.remove('exit'), 520);
+    current = (current + 1) % words.length;
+    words[current].classList.add('active');
+  }, 2400);
+
+  // ── Scroll reveal ───────────────────────────────────────────────────────────
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
