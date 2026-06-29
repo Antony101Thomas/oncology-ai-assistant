@@ -39,14 +39,16 @@ qdrant = QdrantClient(":memory:")
 indexed_chunks:  list[dict[str, Any]] = []
 indexed_sources: list[str]            = []
 
+# ── SessionMiddleware FIRST, then CORS ───────────────────────────────────────
+app.add_middleware(SessionMiddleware,
+                   secret_key=os.getenv("JWT_SECRET", "change-this"))
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(SessionMiddleware,
-                   secret_key=os.getenv("JWT_SECRET", "change-this"))
 
 
 class QuestionRequest(BaseModel):
