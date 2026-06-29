@@ -1,0 +1,26 @@
+name: Keep Supabase Alive
+
+# Pings the Supabase REST API every 3 days so the free-tier project never
+# hits the 7-day inactivity auto-pause. Costs nothing — runs on GitHub's
+# free Actions minutes.
+
+on:
+  schedule:
+    - cron: "0 6 */3 * *"   # every 3 days at 06:00 UTC
+  workflow_dispatch:          # lets you trigger it manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/users?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+          echo "Supabase responded with HTTP $response"
+          if [ "$response" -ge 400 ]; then
+            echo "Ping failed — check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY secrets."
+            exit 1
+          fi

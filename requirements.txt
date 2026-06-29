@@ -35,4 +35,7 @@ bcrypt==4.0.1
 authlib
 httpx
 itsdangerous
+
+# ── Database (Supabase Postgres) ──────────────────────────────────────────────
 sqlalchemy
+psycopg2-binary
