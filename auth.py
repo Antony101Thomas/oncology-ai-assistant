@@ -1,16 +1,16 @@
 # auth.py
 
 import os
+import bcrypt
 from datetime import datetime, timezone, timedelta
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from database import get_user_by_id, get_user_by_email
 
 # ── Config ────────────────────────────────────────────────────────
-SECRET_KEY      = os.getenv("JWT_SECRET", "change-this-in-production")
-ALGORITHM       = "HS256"
+SECRET_KEY         = os.getenv("JWT_SECRET", "change-this-in-production")
+ALGORITHM          = "HS256"
 TOKEN_EXPIRE_HOURS = 24
 
 GOOGLE_CLIENT_ID     = os.getenv("GOOGLE_CLIENT_ID")
@@ -18,13 +18,11 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI  = os.getenv("GOOGLE_REDIRECT_URI", "http://127.0.0.1:8000/auth/callback")
 
 # ── Password hashing ──────────────────────────────────────────────
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password[:72].encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(plain[:72].encode("utf-8"), hashed.encode("utf-8"))
 
 # ── JWT ───────────────────────────────────────────────────────────
 def create_token(user_id: int) -> str:
