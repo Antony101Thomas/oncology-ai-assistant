@@ -211,22 +211,16 @@
     @media(min-width:900px) { .hero-right { display: block; } }
 
     .terminal {
-      background: var(--bg2);
-      border: 0.5px solid var(--border2);
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      background: transparent;
+      border: none;
+      overflow: visible;
+      box-shadow: none;
     }
-    .terminal-bar {
-      padding: 10px 14px;
-      background: rgba(255,255,255,0.03);
-      border-bottom: 0.5px solid var(--border);
-      display: flex; align-items: center; gap: 6px;
-    }
+    .terminal-bar { display: none; }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
     .dot-r { background: #f87171; } .dot-y { background: #fbbf24; } .dot-g { background: var(--green); }
     .terminal-title { margin-left: auto; font-size: 11px; color: var(--text3); }
-    .terminal-body { padding: 20px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; }
+    .terminal-body { padding: 0; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; }
     .t-comment { color: var(--text3); }
     .t-key { color: var(--violet); }
     .t-val { color: var(--green); }
