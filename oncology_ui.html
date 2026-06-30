@@ -966,6 +966,15 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 // ── Init ──────────────────────────────────────────────────────────────────
 checkUrlToken();
+
+// Deep-link support: oncology_ui.html?view=register opens the register screen directly
+// (used by the guest page's "Sign In" / "Register" buttons in its top bar)
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('view') === 'register') {
+    showRegister();
+  }
+})();
 </script>
 
 </body>
