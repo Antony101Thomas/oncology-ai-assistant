@@ -60,17 +60,13 @@
     .topbar-sub   { font-size: 11px; color: var(--text3); }
     .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
-    /* Live pill */
-    .status-pill { display: flex; align-items: center; gap: 5px; background: rgba(72,187,120,0.08); border: 0.5px solid rgba(72,187,120,0.2); border-radius: 20px; padding: 3px 9px; font-size: 11px; color: var(--success); }
-    .status-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 5px rgba(72,187,120,0.6); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
-
     /* Guest free-questions pill */
     .guest-pill { display: flex; align-items: center; gap: 5px; background: var(--teal-dim); border: 0.5px solid var(--border2); border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--teal); font-weight: 600; white-space: nowrap; }
     .guest-pill i { font-size: 12px; }
 
-    /* Theme toggle switch */
+    /* Theme toggle switch (locked — always opens sign-in modal for guests) */
     .theme-switch { display: flex; align-items: center; gap: 6px; }
+    .theme-switch .toggle-track { cursor: not-allowed; }
     .toggle-track { width: 38px; height: 20px; border-radius: 10px; background: var(--bg3); border: 1px solid var(--border2); cursor: pointer; position: relative; transition: background 0.2s; }
     .toggle-track.on { background: var(--teal); border-color: var(--teal); }
     .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 8px; }
@@ -82,6 +78,7 @@
       padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600;
       cursor: pointer; text-decoration: none; transition: background 0.15s, opacity 0.15s, transform 0.1s;
       display: inline-flex; align-items: center; gap: 6px; border: 0.5px solid var(--border2);
+      font-family: inherit; outline: none;
     }
     .btn-signin { background: transparent; color: var(--text); }
     .btn-signin:hover { background: var(--teal-dim); }
@@ -90,36 +87,6 @@
 
     /* ── Layout ── */
     .main { display: flex; flex: 1; overflow: hidden; }
-
-    /* ── Sidebar ── */
-    .sidebar { width: 256px; border-right: 1px solid var(--border); background: var(--bg2); padding: 16px 0; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; transition: background 0.25s; }
-    .sidebar-section { padding: 0 12px 14px; }
-    .sidebar-label { font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; padding: 0 8px; margin-bottom: 6px; }
-    .guest-banner { margin: 0 12px 14px; padding: 12px; border-radius: 10px; background: var(--teal-dim); border: 0.5px solid var(--border2); }
-    .guest-banner-title { font-size: 12px; font-weight: 700; color: var(--teal); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-    .guest-banner-text { font-size: 11px; color: var(--text2); line-height: 1.5; margin-bottom: 8px; }
-    .guest-banner-btn { display: block; text-align: center; padding: 7px; border-radius: 7px; background: var(--teal); color: #fff; font-size: 11.5px; font-weight: 600; text-decoration: none; }
-    .guest-banner-btn:hover { opacity: 0.88; }
-    .divider { height: 0.5px; background: var(--border); margin: 6px 12px 10px; }
-
-    /* ── Source cards ── */
-    .source-card { margin: 0 4px 6px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--bg3); }
-    .source-card-header { display: flex; align-items: center; gap: 7px; padding: 8px 10px; cursor: pointer; user-select: none; }
-    .source-card-title { flex: 1; font-size: 12.5px; color: var(--text); font-weight: 500; }
-    .source-chevron { font-size: 12px; color: var(--text3); transition: transform 0.2s; }
-    .source-chevron.open { transform: rotate(180deg); }
-    .source-card-body { padding: 0 10px 10px; display: flex; flex-direction: column; gap: 5px; }
-    .source-stat { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); line-height: 1.4; }
-    .source-stat i { font-size: 11px; color: var(--text3); flex-shrink: 0; }
-    .source-tag { display: inline-block; font-size: 10px; color: var(--teal); background: var(--teal-dim); border-radius: 4px; padding: 2px 7px; margin-top: 2px; }
-    .source-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .dot-green  { background: #34d399; box-shadow: 0 0 5px rgba(52,211,153,0.5); }
-    .dot-teal   { background: #38bdf8; box-shadow: 0 0 5px rgba(56,189,248,0.5); }
-    .dot-purple { background: #a78bfa; box-shadow: 0 0 5px rgba(167,139,250,0.5); }
-    .nccn-file { font-size: 11px; color: var(--text2); padding: 4px 6px; margin: 1px 0; display: flex; align-items: center; gap: 6px; border-radius: 5px; text-decoration: none; transition: background 0.15s, color 0.15s; cursor: pointer; }
-    .nccn-file:hover { background: var(--teal-dim); color: var(--teal); }
-    .nccn-file i { font-size: 10px; color: var(--teal); flex-shrink: 0; }
-    .nccn-file span { flex: 1; }
 
     /* ── Chat area ── */
     .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); transition: background 0.25s; }
@@ -181,22 +148,42 @@
     /* ── Paywall overlay (shown after the free-question limit is hit) ── */
     .paywall-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 800; display: none; align-items: center; justify-content: center; padding: 20px; }
     .paywall-overlay.open { display: flex; }
-    .paywall-card { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: 18px; padding: 36px 32px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 12px 40px var(--shadow); }
+    .paywall-card { position: relative; background: var(--bg2); border: 0.5px solid var(--border2); border-radius: 18px; padding: 36px 32px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 12px 40px var(--shadow); }
     .paywall-icon { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg,#6d28d9,#a78bfa); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; margin-bottom: 16px; }
     .paywall-title { font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
     .paywall-text { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 24px; }
     .paywall-buttons { display: flex; flex-direction: column; gap: 10px; }
-    .paywall-btn-primary { padding: 11px; border-radius: 9px; background: var(--teal); color: #fff; font-size: 13.5px; font-weight: 600; text-decoration: none; }
+    .paywall-btn-primary { padding: 11px; border-radius: 9px; background: var(--teal); color: #fff; font-size: 13.5px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
     .paywall-btn-primary:hover { opacity: 0.88; }
-    .paywall-btn-secondary { padding: 11px; border-radius: 9px; background: transparent; border: 0.5px solid var(--border2); color: var(--text); font-size: 13.5px; font-weight: 600; text-decoration: none; }
+    .paywall-btn-secondary { padding: 11px; border-radius: 9px; background: transparent; border: 0.5px solid var(--border2); color: var(--text); font-size: 13.5px; font-weight: 600; text-decoration: none; cursor: pointer; font-family: inherit; }
     .paywall-btn-secondary:hover { background: var(--teal-dim); }
+
+    /* ── Generic modal close (×) button, shared by paywall + auth modal ── */
+    .modal-close-x {
+      position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 8px;
+      background: transparent; border: none; color: var(--text3); font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s;
+    }
+    .modal-close-x:hover { background: var(--teal-dim); color: var(--text); }
+
+    /* ── Auth modal (Sign In / Register popup) ── */
+    .auth-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 900; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .auth-modal-overlay.open { display: flex; }
+    .auth-modal-card { position: relative; background: var(--bg2); border: 0.5px solid var(--border2); border-radius: 18px; padding: 36px 32px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 12px 40px var(--shadow); }
+    .auth-modal-icon { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg,#6d28d9,#a78bfa); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; margin: 0 auto 16px; }
+    .auth-modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .auth-modal-text { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 22px; }
+    .auth-modal-buttons { display: flex; flex-direction: column; gap: 10px; }
+    .auth-modal-btn-primary { padding: 11px; border-radius: 9px; background: var(--teal); color: #fff; font-size: 13.5px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
+    .auth-modal-btn-primary:hover { opacity: 0.88; }
+    .auth-modal-btn-secondary { padding: 11px; border-radius: 9px; background: transparent; border: 0.5px solid var(--border2); color: var(--text); font-size: 13.5px; font-weight: 600; text-decoration: none; cursor: pointer; font-family: inherit; }
+    .auth-modal-btn-secondary:hover { background: var(--teal-dim); }
 
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 
     @media (max-width: 720px) {
-      .sidebar { display: none; }
       .topbar-sub { display: none; }
       .guest-pill span { display: none; }
     }
@@ -204,15 +191,30 @@
 </head>
 <body>
 
-<!-- ── Paywall overlay ── -->
+<!-- ── Paywall overlay (auto-opens once the 3 free questions are used) ── -->
 <div class="paywall-overlay" id="paywallOverlay">
   <div class="paywall-card">
+    <button type="button" class="modal-close-x" onclick="closePaywall()" aria-label="Close"><i class="ti ti-x"></i></button>
     <div class="paywall-icon"><i class="ti ti-lock"></i></div>
     <div class="paywall-title">You've used your 3 free questions</div>
     <div class="paywall-text">Sign in or create a free account to keep asking ONCO AI oncology questions, save your history, and upload your own guideline PDFs.</div>
     <div class="paywall-buttons">
-      <a class="paywall-btn-primary" href="oncology_ui.html?view=register">Create a free account</a>
-      <a class="paywall-btn-secondary" href="oncology_ui.html">Sign in</a>
+      <button type="button" class="paywall-btn-primary" onclick="openAuthModal('register')">Create a free account</button>
+      <button type="button" class="paywall-btn-secondary" onclick="openAuthModal('signin')">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Auth modal (Sign In / Register popup — used instead of any direct redirect) ── -->
+<div class="auth-modal-overlay" id="authModalOverlay" onclick="if(event.target===this) closeAuthModal()">
+  <div class="auth-modal-card">
+    <button type="button" class="modal-close-x" onclick="closeAuthModal()" aria-label="Close"><i class="ti ti-x"></i></button>
+    <div class="auth-modal-icon"><i class="ti ti-user-circle"></i></div>
+    <div class="auth-modal-title" id="authModalTitle">Sign in required</div>
+    <div class="auth-modal-text" id="authModalText">Create a free ONCO AI account or sign in to continue — unlock unlimited questions, saved history, dark mode, and full PDF access.</div>
+    <div class="auth-modal-buttons">
+      <a class="auth-modal-btn-primary" href="oncology_ui.html?view=register">Create a free account</a>
+      <a class="auth-modal-btn-secondary" href="oncology_ui.html">Sign in</a>
     </div>
   </div>
 </div>
@@ -232,14 +234,9 @@
         <span><span id="guestRemaining">3</span> free questions left</span>
       </div>
 
-      <div class="status-pill">
-        <div class="status-dot"></div>
-        <span>Live</span>
-      </div>
-
-      <div class="theme-switch" title="Toggle dark / light mode">
+      <div class="theme-switch" title="Sign in to switch to dark mode">
         <i class="ti ti-sun" style="font-size:11px;color:var(--text3);"></i>
-        <div class="toggle-track" id="mainToggleTrack" onclick="toggleTheme()">
+        <div class="toggle-track" id="mainToggleTrack" onclick="openAuthModal()">
           <div class="toggle-thumb"></div>
         </div>
         <i class="ti ti-moon" style="font-size:11px;color:var(--text3);"></i>
@@ -247,67 +244,13 @@
 
       <!-- Sign in / Register only — no profile menu for guests -->
       <div class="guest-auth-actions">
-        <a class="btn-signin" href="oncology_ui.html"><i class="ti ti-login"></i> Sign In</a>
-        <a class="btn-register" href="oncology_ui.html?view=register"><i class="ti ti-user-plus"></i> Register</a>
+        <button type="button" class="btn-signin" onclick="openAuthModal('signin')"><i class="ti ti-login"></i> Sign In</button>
+        <button type="button" class="btn-register" onclick="openAuthModal('register')"><i class="ti ti-user-plus"></i> Register</button>
       </div>
     </div>
   </div>
 
   <div class="main">
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="guest-banner">
-        <div class="guest-banner-title"><i class="ti ti-sparkles"></i> Guest mode</div>
-        <div class="guest-banner-text">You're trying ONCO AI without an account. You get <strong>3 free questions</strong> — after that, sign in to keep going, save history, and upload your own PDFs.</div>
-        <a class="guest-banner-btn" href="oncology_ui.html?view=register">Create free account</a>
-      </div>
-      <div class="divider"></div>
-      <div class="sidebar-section" style="padding-bottom:0;">
-        <div class="sidebar-label">Sources active</div>
-        <div class="source-card">
-          <div class="source-card-header" onclick="toggleSource('pubmed')">
-            <span class="source-dot dot-green"></span>
-            <i class="ti ti-book" style="font-size:13px;color:var(--text2);"></i>
-            <span class="source-card-title">PubMed</span>
-            <i class="ti ti-chevron-down source-chevron" id="chev-pubmed"></i>
-          </div>
-          <div class="source-card-body" id="body-pubmed" style="display:none;">
-            <div class="source-stat"><i class="ti ti-database"></i> NCBI / NLM database</div>
-            <div class="source-stat"><i class="ti ti-file-text"></i> 36M+ indexed articles</div>
-            <div class="source-stat"><i class="ti ti-refresh"></i> Live API · real-time</div>
-            <div class="source-tag">Peer-reviewed research</div>
-          </div>
-        </div>
-        <div class="source-card">
-          <div class="source-card-header" onclick="toggleSource('nccn')">
-            <span class="source-dot dot-teal"></span>
-            <i class="ti ti-stethoscope" style="font-size:13px;color:var(--text2);"></i>
-            <span class="source-card-title">NCCN Guidelines</span>
-            <i class="ti ti-chevron-down source-chevron" id="chev-nccn"></i>
-          </div>
-          <div class="source-card-body" id="body-nccn" style="display:none;">
-            <div class="source-stat" style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Indexed PDFs</div>
-            <div id="nccn-file-list"><div class="source-stat" style="color:var(--text3);font-style:italic;">Loading…</div></div>
-            <div class="source-tag" style="margin-top:6px;">Local vector index · BM25</div>
-          </div>
-        </div>
-        <div class="source-card">
-          <div class="source-card-header" onclick="toggleSource('trials')">
-            <span class="source-dot dot-purple"></span>
-            <i class="ti ti-test-pipe" style="font-size:13px;color:var(--text2);"></i>
-            <span class="source-card-title">ClinicalTrials.gov</span>
-            <i class="ti ti-chevron-down source-chevron" id="chev-trials"></i>
-          </div>
-          <div class="source-card-body" id="body-trials" style="display:none;">
-            <div class="source-stat"><i class="ti ti-world"></i> US NIH registry</div>
-            <div class="source-stat"><i class="ti ti-clipboard-list"></i> 500K+ registered trials</div>
-            <div class="source-stat"><i class="ti ti-refresh"></i> Live API v2 · real-time</div>
-            <div class="source-tag">Global trial registry</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Chat view -->
     <div class="chat-area" id="view-chat">
@@ -343,7 +286,6 @@
 
 <script>
 const API = 'https://onco-ai-api.onrender.com';
-let isDark = true;
 
 // ── Guest question limit ────────────────────────────────────────────────
 const GUEST_LIMIT = 3;
@@ -367,15 +309,40 @@ function lockForSignIn() {
   document.getElementById('inputRow').classList.add('disabled');
   document.getElementById('paywallOverlay').classList.add('open');
 }
-
-// ── Theme ─────────────────────────────────────────────────────────────────
-function applyTheme() {
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  const mt = document.getElementById('mainToggleTrack');
-  if (mt) mt.classList.toggle('on', isDark);
+function closePaywall() {
+  document.getElementById('paywallOverlay').classList.remove('open');
 }
-function toggleTheme() { isDark = !isDark; applyTheme(); }
+
+// ── Theme (locked to light mode for guests — toggling requires sign-in) ────
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', 'light');
+  const mt = document.getElementById('mainToggleTrack');
+  if (mt) mt.classList.remove('on');
+}
 applyTheme();
+
+// ── Auth modal (Sign In / Register popup) ───────────────────────────────────
+function openAuthModal(mode) {
+  const title = document.getElementById('authModalTitle');
+  const text  = document.getElementById('authModalText');
+  if (mode === 'register') {
+    title.textContent = 'Create your free account';
+    text.textContent  = 'Register to unlock unlimited questions, saved history, dark mode, and full access to guideline PDFs.';
+  } else if (mode === 'signin') {
+    title.textContent = 'Sign in to continue';
+    text.textContent  = 'Sign in to your ONCO AI account to unlock unlimited questions, saved history, dark mode, and full access to guideline PDFs.';
+  } else {
+    title.textContent = 'Sign in required';
+    text.textContent  = 'Create a free ONCO AI account or sign in to continue — unlock unlimited questions, saved history, dark mode, and full PDF access.';
+  }
+  document.getElementById('authModalOverlay').classList.add('open');
+}
+function closeAuthModal() {
+  document.getElementById('authModalOverlay').classList.remove('open');
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeAuthModal(); closePaywall(); }
+});
 
 // ── Strip citation markers ─────────────────────────────────────────────────
 function stripInlineCitations(text) {
@@ -462,11 +429,9 @@ async function sendMessage() {
           const icon = c.type === 'pubmed' ? 'ti-book' : c.type === 'trial' ? 'ti-test-pipe' : 'ti-file-certificate';
           let titleHtml;
           if (c.type === 'pdf' && c.title) {
-            const match = c.title.match(/^(.+\.pdf)[^\d]*(\d+)$/i);
-            if (match) {
-              const pdfUrl = `${API}/pdf/${encodeURIComponent(match[1].trim())}#page=${match[2]}`;
-              titleHtml = `<a href="${pdfUrl}" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none;">${escapeHtml(c.title)}</a>`;
-            } else { titleHtml = escapeHtml(c.title); }
+            // Guests don't get direct PDF access — clicking opens the sign-in/register
+            // popup instead of navigating to the PDF.
+            titleHtml = `<a href="#" onclick="event.preventDefault(); openAuthModal('signin'); return false;" style="color:var(--teal);text-decoration:none;">${escapeHtml(c.title)}</a>`;
           } else if (c.url) {
             titleHtml = `<a href="${c.url}" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none;">${escapeHtml(c.title)}</a>`;
           } else { titleHtml = escapeHtml(c.title); }
@@ -539,43 +504,6 @@ function toggleSource(id) {
   if (chev) chev.classList.toggle('open', !isOpen);
 }
 
-// ── NCCN file list ─────────────────────────────────────────────────────────
-async function loadNccnFiles() {
-  try {
-    const res  = await fetch(`${API}/health`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const files = data.indexed_files || [];
-    const el = document.getElementById('nccn-file-list');
-    if (!el) return;
-    if (files.length === 0) {
-      el.innerHTML = '<div class="source-stat" style="color:var(--text3);font-style:italic;">No PDFs indexed yet</div>'; return;
-    }
-    const NCCN_NAMES = {
-      'breast':'Breast Cancer — Invasive','breast-metastatic':'Breast Cancer — Metastatic',
-      'nsclc':'Lung Cancer — Non-Small Cell','sclc':'Lung Cancer — Small Cell',
-      'colon':'Colon Cancer','prostate':'Prostate Cancer','ovarian':'Ovarian Cancer',
-      'cervical':'Cervical Cancer','pancreatic':'Pancreatic Cancer','stomach':'Stomach Cancer',
-      'liver-hp':'Liver Cancer','melanoma':'Melanoma — Skin','cll':'Chronic Lymphocytic Leukemia',
-      'cml':'Chronic Myeloid Leukemia','hodgkin':'Hodgkin Lymphoma','dlbcl':'Diffuse Large B-Cell Lymphoma',
-      'myeloma':'Multiple Myeloma','all':'Acute Lymphoblastic Leukemia','thyroid':'Thyroid Cancer','bladder':'Bladder Cancer',
-    };
-    function prettify(name) {
-      const match = name.match(/^NCCN_(.+?)(?:_patient)?\.pdf$/i);
-      const slug = match ? match[1].toLowerCase() : name.toLowerCase().replace(/\.pdf$/i,'');
-      return NCCN_NAMES[slug] || slug.replace(/-/g,' ').replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
-    }
-    el.innerHTML = files.map(f =>
-      `<a class="nccn-file" href="${API}/pdf/${encodeURIComponent(f)}" target="_blank" rel="noopener">
-        <i class="ti ti-file-certificate"></i><span>${prettify(f)}</span>
-        <i class="ti ti-external-link" style="font-size:9px;margin-left:auto;opacity:0.5;"></i>
-      </a>`).join('');
-  } catch {
-    const el = document.getElementById('nccn-file-list');
-    if (el) el.innerHTML = '<div class="source-stat" style="color:var(--text3);font-style:italic;">Server offline</div>';
-  }
-}
-
 // ── Helpers ───────────────────────────────────────────────────────────────
 function formatAnswer(text) {
   const escaped = escapeHtml(text);
@@ -603,7 +531,6 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 // ── Init ──────────────────────────────────────────────────────────────────
 updateGuestPill();
-loadNccnFiles();
 </script>
 
 </body>
