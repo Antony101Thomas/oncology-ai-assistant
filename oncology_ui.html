@@ -482,7 +482,7 @@
               <i class="ti ti-paperclip"></i>
             </button>
             <input type="file" id="pdfUpload" accept="application/pdf,.pdf" multiple hidden onchange="uploadPdfs(event)" />
-            <input type="text" id="userInput" placeholder="Ask an oncology question…" onkeydown="if(event.key==='Enter') sendMessage()" />
+            <input type="text" id="userInput" name="onco-ai-question-field" placeholder="Ask an oncology question…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter') sendMessage()" />
           </div>
           <button class="send-btn" title="Send" onclick="sendMessage()">
             <i class="ti ti-arrow-up"></i>
