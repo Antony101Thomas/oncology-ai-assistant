@@ -1,15 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ONCO AI — by Antony Thomas</title>
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('onco_landing_theme');
+        document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+      } catch (e) {}
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
+    :root, [data-theme="dark"] {
       --bg:        #000000;
       --bg2:       #0d0d0d;
       --teal:      #a78bfa;
@@ -21,6 +29,36 @@
       --text3:     #6b7280;
       --border:    rgba(255,255,255,0.08);
       --border2:   rgba(255,255,255,0.16);
+      --heading:   #f1f5f9;
+      --nav-bg:    rgba(8,12,20,0.85);
+      --grid-line: rgba(255,255,255,0.03);
+      --hover-overlay: rgba(255,255,255,0.06);
+      --hover-overlay2: rgba(255,255,255,0.08);
+      --stats-bg:  rgba(14,21,33,0.6);
+      --btn-primary-bg:   #ffffff;
+      --btn-primary-text: #000000;
+    }
+
+    [data-theme="light"] {
+      --bg:        #f7f5fb;
+      --bg2:       #ffffff;
+      --teal:      #7c3aed;
+      --teal2:     #1a202c;
+      --violet:    #059669;
+      --green:     #276749;
+      --text:      #1a202c;
+      --text2:     #4a5568;
+      --text3:     #94a3b8;
+      --border:    rgba(124,58,237,0.14);
+      --border2:   rgba(124,58,237,0.28);
+      --heading:   #1a202c;
+      --nav-bg:    rgba(255,255,255,0.85);
+      --grid-line: rgba(124,58,237,0.05);
+      --hover-overlay: rgba(124,58,237,0.06);
+      --hover-overlay2: rgba(124,58,237,0.1);
+      --stats-bg:  rgba(124,58,237,0.04);
+      --btn-primary-bg:   #1a202c;
+      --btn-primary-text: #ffffff;
     }
 
     html { scroll-behavior: smooth; }
@@ -31,6 +69,7 @@
       font-size: 15px;
       line-height: 1.6;
       overflow-x: hidden;
+      transition: background 0.25s, color 0.25s;
     }
 
     /* ── NAV ── */
@@ -38,9 +77,10 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 40px;
-      background: rgba(8,12,20,0.85);
+      background: var(--nav-bg);
       backdrop-filter: blur(14px);
       border-bottom: 0.5px solid var(--border);
+      transition: background 0.25s, border-color 0.25s;
     }
     .nav-logo {
       display: flex; align-items: center; gap: 12px;
@@ -61,6 +101,7 @@
       font-size: 17px;
     }
     .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-right { display: flex; align-items: center; gap: 28px; }
     .nav-links a {
       color: var(--text2); text-decoration: none; font-size: 14px;
       transition: color 0.2s;
@@ -82,7 +123,25 @@
       transition: background 0.2s !important;
       text-decoration: none;
     }
-    .btn-try-now:hover { background: rgba(255,255,255,0.06) !important; }
+    .btn-try-now:hover { background: var(--hover-overlay) !important; }
+
+    /* Theme toggle switch (sun / moon) */
+    .theme-switch { display: flex; align-items: center; gap: 7px; margin-left: 6px; }
+    .theme-switch i { font-size: 13px; color: var(--text3); transition: color 0.2s; }
+    .toggle-track {
+      width: 40px; height: 22px; border-radius: 11px;
+      background: var(--bg2); border: 1px solid var(--border2);
+      cursor: pointer; position: relative; transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle-track.on { background: var(--teal); border-color: var(--teal); }
+    .toggle-thumb {
+      position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+      border-radius: 50%; background: #fff; transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center; font-size: 9px;
+    }
+    .toggle-track.on .toggle-thumb { transform: translateX(18px); }
 
     /* ── HERO ── */
     .hero {
@@ -100,8 +159,8 @@
       content: '';
       position: fixed; inset: 0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 60px 60px;
       pointer-events: none;
       z-index: 0;
@@ -140,7 +199,7 @@
       font-weight: 700;
       line-height: 1.1;
       letter-spacing: -0.02em;
-      color: #f1f5f9;
+      color: var(--heading);
       margin-bottom: 8px;
     }
     .hero-headline .by-line {
@@ -163,7 +222,7 @@
       margin-bottom: 28px;
       display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
     }
-    .static-word { color: #f1f5f9; }
+    .static-word { color: var(--heading); }
     .animated-word-wrap {
       position: relative;
       display: inline-block;
@@ -200,10 +259,10 @@
     .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
     .btn-primary {
       padding: 13px 28px; border-radius: 8px;
-      background: #ffffff; color: #000;
+      background: var(--btn-primary-bg); color: var(--btn-primary-text);
       font-weight: 600; font-size: 15px;
       text-decoration: none; border: none; cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
+      transition: opacity 0.2s, transform 0.15s, background 0.25s, color 0.25s;
       display: inline-flex; align-items: center; gap: 8px;
     }
     .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
@@ -216,16 +275,17 @@
       transition: background 0.2s, transform 0.15s;
       display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-secondary:hover { background: rgba(255,255,255,0.06); transform: translateY(-1px); }
+    .btn-secondary:hover { background: var(--hover-overlay); transform: translateY(-1px); }
 
     /* ── STATS ── */
     .stats-band {
       position: relative; z-index: 1;
       border-top: 0.5px solid var(--border);
       border-bottom: 0.5px solid var(--border);
-      background: rgba(14,21,33,0.6);
+      background: var(--stats-bg);
       padding: 32px 40px;
       display: flex; justify-content: center; gap: 60px; flex-wrap: wrap;
+      transition: background 0.25s;
     }
     .stat { text-align: center; }
     .stat-num {
@@ -248,7 +308,7 @@
       font-family: 'Space Grotesk', sans-serif;
       font-size: clamp(26px, 3.5vw, 42px);
       font-weight: 700; line-height: 1.2;
-      letter-spacing: -0.02em; color: #f1f5f9;
+      letter-spacing: -0.02em; color: var(--heading);
       margin-bottom: 16px;
     }
     .section-sub { font-size: 16px; color: var(--text2); max-width: 520px; line-height: 1.7; }
@@ -280,7 +340,7 @@
     .icon-green { background: rgba(52,211,153,0.1); }
     .icon-amber { background: rgba(251,191,36,0.1); }
 
-    .feature-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
+    .feature-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; color: var(--heading); margin-bottom: 8px; }
     .feature-desc  { font-size: 13.5px; color: var(--text2); line-height: 1.65; }
 
     /* ── HOW IT WORKS ── */
@@ -300,7 +360,7 @@
       color: rgba(167,139,250,0.12);
       line-height: 1; margin-bottom: 14px;
     }
-    .step-title { font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
+    .step-title { font-size: 15px; font-weight: 600; color: var(--heading); margin-bottom: 8px; }
     .step-desc  { font-size: 13px; color: var(--text2); line-height: 1.65; }
 
     /* ── PIPELINE VISUAL ── */
@@ -350,7 +410,7 @@
       flex-shrink: 0;
     }
     .creator-info { flex: 1; min-width: 220px; }
-    .creator-name { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #f1f5f9; }
+    .creator-name { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: var(--heading); }
     .creator-role { font-size: 14px; color: var(--teal); margin: 4px 0 12px; font-weight: 500; }
     .creator-bio  { font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 500px; }
 
@@ -370,7 +430,7 @@
     .cta-title {
       font-family: 'Space Grotesk', sans-serif;
       font-size: clamp(24px, 3vw, 40px);
-      font-weight: 700; color: #f1f5f9;
+      font-weight: 700; color: var(--heading);
       line-height: 1.2; margin-bottom: 16px;
     }
     .cta-sub { font-size: 16px; color: var(--text2); margin-bottom: 36px; }
@@ -393,7 +453,7 @@
       transition: background 0.2s, color 0.2s, transform 0.15s;
       font-family: 'Inter', sans-serif;
     }
-    .back-to-top:hover { background: rgba(255,255,255,0.08); color: var(--text); transform: translateY(-2px); }
+    .back-to-top:hover { background: var(--hover-overlay2); color: var(--text); transform: translateY(-2px); }
 
     /* ── SCROLL ANIMATIONS ── */
     .reveal {
@@ -422,10 +482,19 @@
     <img src="data:image/png;base64,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" alt="ONCO AI" style="width:42px;height:42px;border-radius:10px;object-fit:cover;">
     <span class="nav-logo-text">ONCO AI</span>
   </a>
-  <div class="nav-links">
-    <a href="#how">How it works</a>
-    <a href="#features">Features</a>
-    <a href="#about">About</a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="theme-switch" title="Toggle dark / light mode">
+      <i class="ti ti-sun"></i>
+      <div class="toggle-track" id="navToggleTrack" onclick="toggleTheme()">
+        <div class="toggle-thumb"></div>
+      </div>
+      <i class="ti ti-moon"></i>
+    </div>
   </div>
 </nav>
 
@@ -621,6 +690,22 @@
 </footer>
 
 <script>
+  // ── Theme (persisted across visits) ─────────────────────────────────────────
+  const THEME_KEY = 'onco_landing_theme';
+  let isDark = (localStorage.getItem(THEME_KEY) || 'dark') === 'dark';
+
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    const t = document.getElementById('navToggleTrack');
+    if (t) t.classList.toggle('on', isDark);
+  }
+  function toggleTheme() {
+    isDark = !isDark;
+    localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+    applyTheme();
+  }
+  applyTheme();
+
   // ── Animated words ──────────────────────────────────────────────────────────
   const words = document.querySelectorAll('.aword');
   let current = 0;

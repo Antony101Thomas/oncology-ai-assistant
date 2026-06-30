@@ -260,11 +260,11 @@
     </div>
     <div class="auth-field">
       <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="you@example.com" />
+      <input type="email" id="loginEmail" name="onco-login-id" placeholder="you@example.com" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" />
     </div>
     <div class="auth-field">
       <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="••••••••"
+      <input type="password" id="loginPassword" name="onco-login-secret" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
              onkeydown="if(event.key==='Enter') submitLogin()" />
     </div>
     <button class="auth-btn" id="loginBtn" onclick="submitLogin()">Sign In</button>
@@ -293,15 +293,15 @@
     </div>
     <div class="auth-field">
       <label>Full Name</label>
-      <input type="text" id="registerName" placeholder="Your name" />
+      <input type="text" id="registerName" name="onco-register-name" placeholder="Your name" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" />
     </div>
     <div class="auth-field">
       <label>Email</label>
-      <input type="email" id="registerEmail" placeholder="you@example.com" />
+      <input type="email" id="registerEmail" name="onco-register-id" placeholder="you@example.com" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" />
     </div>
     <div class="auth-field">
       <label>Password</label>
-      <input type="password" id="registerPassword" placeholder="••••••••"
+      <input type="password" id="registerPassword" name="onco-register-secret" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
              onkeydown="if(event.key==='Enter') submitRegister()" />
     </div>
     <button class="auth-btn" id="registerBtn" onclick="submitRegister()">Create Account</button>
