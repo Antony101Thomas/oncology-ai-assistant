@@ -298,3 +298,27 @@ def ask_question(request: QuestionRequest,
     )
 
     return result
+
+
+# ── Guest ask route (no auth, limited on the frontend to N free questions) ────
+
+@app.post("/ask-guest")
+def ask_question_guest(request: QuestionRequest) -> dict[str, Any]:
+    """
+    Same pipeline as /ask, but does not require a logged-in user and does not
+    persist anything to chat_history. The free-question limit is enforced by
+    the guest frontend (guest.html); this endpoint just answers the question.
+    """
+    if not indexed_chunks:
+        raise HTTPException(
+            status_code=409,
+            detail="No PDFs indexed yet. Upload PDFs first.",
+        )
+
+    result = execute_rag_query(
+        question=request.question,
+        qdrant=qdrant,
+        indexed_chunks=indexed_chunks,
+    )
+
+    return result
