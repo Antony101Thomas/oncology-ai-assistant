@@ -9,17 +9,17 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #080c14;
-      --bg2:       #0e1521;
-      --teal:      #38bdf8;
-      --teal2:     #0ea5e9;
-      --violet:    #818cf8;
+      --bg:        #000000;
+      --bg2:       #0d0d0d;
+      --teal:      #a78bfa;
+      --teal2:     #f4f4f5;
+      --violet:    #6ee7b7;
       --green:     #34d399;
-      --text:      #e2e8f0;
-      --text2:     #94a3b8;
-      --text3:     #475569;
-      --border:    rgba(56,189,248,0.12);
-      --border2:   rgba(56,189,248,0.22);
+      --text:      #f4f4f5;
+      --text2:     #a1a1aa;
+      --text3:     #6b7280;
+      --border:    rgba(255,255,255,0.08);
+      --border2:   rgba(255,255,255,0.16);
     }
 
     html { scroll-behavior: smooth; }
@@ -49,7 +49,7 @@
     }
     .logo-mark {
       width: 32px; height: 32px; border-radius: 8px;
-      background: linear-gradient(135deg, #0369a1, #38bdf8);
+      background: linear-gradient(135deg, #7c3aed, #34d399);
       display: flex; align-items: center; justify-content: center;
       font-size: 17px;
     }
@@ -61,11 +61,11 @@
     .nav-links a:hover { color: var(--text); }
     .nav-cta {
       padding: 8px 18px; border-radius: 8px;
-      background: var(--teal2); color: #fff !important;
+      background: #ffffff; color: #000 !important;
       font-weight: 600; font-size: 14px;
-      transition: background 0.2s !important;
+      transition: opacity 0.2s !important;
     }
-    .nav-cta:hover { background: var(--teal) !important; }
+    .nav-cta:hover { opacity: 0.85; }
 
     /* ── HERO ── */
     .hero {
@@ -83,8 +83,8 @@
       content: '';
       position: fixed; inset: 0;
       background-image:
-        linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
       pointer-events: none;
       z-index: 0;
@@ -95,7 +95,7 @@
       content: '';
       position: fixed; top: -200px; left: -100px;
       width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(56,189,248,0.07) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(167,139,250,0.10) 0%, transparent 70%);
       pointer-events: none; z-index: 0;
     }
 
@@ -103,7 +103,7 @@
 
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(56,189,248,0.08);
+      background: rgba(167,139,250,0.08);
       border: 0.5px solid var(--border2);
       border-radius: 20px;
       padding: 5px 14px; margin-bottom: 28px;
@@ -150,9 +150,9 @@
     .animated-word-wrap {
       position: relative;
       display: inline-block;
-      min-width: 340px;
+      min-width: 460px;
       height: 1.15em;
-      overflow: hidden;
+      overflow: visible;
     }
     .aword {
       position: absolute; top: 0; left: 0;
@@ -182,16 +182,16 @@
 
     .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
     .btn-primary {
-      padding: 13px 28px; border-radius: 9px;
-      background: var(--teal2); color: #fff;
+      padding: 13px 28px; border-radius: 8px;
+      background: #ffffff; color: #000;
       font-weight: 600; font-size: 15px;
       text-decoration: none; border: none; cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
+      transition: opacity 0.2s, transform 0.15s;
       display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-primary:hover { background: var(--teal); transform: translateY(-1px); }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
     .btn-secondary {
-      padding: 13px 28px; border-radius: 9px;
+      padding: 13px 28px; border-radius: 8px;
       background: transparent; color: var(--text);
       font-weight: 600; font-size: 15px;
       text-decoration: none; cursor: pointer;
@@ -199,35 +199,7 @@
       transition: background 0.2s, transform 0.15s;
       display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-secondary:hover { background: rgba(56,189,248,0.07); transform: translateY(-1px); }
-
-    /* Terminal card */
-    .hero-right {
-      position: absolute; right: 0; top: 50%;
-      transform: translateY(-50%);
-      width: 380px;
-      display: none;
-    }
-    @media(min-width:900px) { .hero-right { display: block; } }
-
-    .terminal {
-      background: transparent;
-      border: none;
-      overflow: visible;
-      box-shadow: none;
-    }
-    .terminal-bar { display: none; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-r { background: #f87171; } .dot-y { background: #fbbf24; } .dot-g { background: var(--green); }
-    .terminal-title { margin-left: auto; font-size: 11px; color: var(--text3); }
-    .terminal-body { padding: 0; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; }
-    .t-comment { color: var(--text3); }
-    .t-key { color: var(--violet); }
-    .t-val { color: var(--green); }
-    .t-prompt { color: var(--teal); }
-    .t-line { display: block; }
-    .t-cursor { display: inline-block; width: 8px; height: 14px; background: var(--teal); vertical-align: middle; animation: blink 1s infinite; }
-    @keyframes blink { 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
+    .btn-secondary:hover { background: rgba(255,255,255,0.06); transform: translateY(-1px); }
 
     /* ── STATS ── */
     .stats-band {
@@ -278,7 +250,7 @@
     }
     .feature-card:hover {
       border-color: var(--border2);
-      box-shadow: 0 8px 40px rgba(56,189,248,0.08);
+      box-shadow: 0 8px 40px rgba(167,139,250,0.08);
       transform: translateY(-3px);
     }
     .feature-icon {
@@ -286,7 +258,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 22px; margin-bottom: 16px;
     }
-    .icon-teal  { background: rgba(56,189,248,0.1); }
+    .icon-teal  { background: rgba(167,139,250,0.1); }
     .icon-violet{ background: rgba(129,140,248,0.1); }
     .icon-green { background: rgba(52,211,153,0.1); }
     .icon-amber { background: rgba(251,191,36,0.1); }
@@ -308,7 +280,7 @@
     .step-num {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 48px; font-weight: 700;
-      color: rgba(56,189,248,0.12);
+      color: rgba(167,139,250,0.12);
       line-height: 1; margin-bottom: 14px;
     }
     .step-title { font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
@@ -332,10 +304,10 @@
       border: 0.5px solid var(--border2);
       display: flex; align-items: center; justify-content: center;
       font-size: 28px;
-      background: rgba(56,189,248,0.05);
+      background: rgba(167,139,250,0.05);
       transition: background 0.2s, transform 0.2s;
     }
-    .pipe-node:hover .pipe-box { background: rgba(56,189,248,0.12); transform: scale(1.06); }
+    .pipe-node:hover .pipe-box { background: rgba(167,139,250,0.12); transform: scale(1.06); }
     .pipe-label { font-size: 11px; color: var(--text3); text-align: center; font-weight: 500; }
     .pipe-arrow { font-size: 18px; color: var(--text3); margin: 0 6px; padding-bottom: 20px; }
 
@@ -354,7 +326,7 @@
     }
     .creator-avatar {
       width: 90px; height: 90px; border-radius: 50%;
-      background: linear-gradient(135deg, #0369a1, var(--violet));
+      background: linear-gradient(135deg, #7c3aed, var(--violet));
       display: flex; align-items: center; justify-content: center;
       font-family: 'Space Grotesk', sans-serif;
       font-size: 32px; font-weight: 700; color: #fff;
@@ -374,7 +346,7 @@
     .cta-card {
       border-radius: 20px;
       background: linear-gradient(135deg, rgba(3,105,161,0.25), rgba(129,140,248,0.15));
-      border: 0.5px solid rgba(56,189,248,0.2);
+      border: 0.5px solid rgba(167,139,250,0.2);
       padding: 64px 48px;
       text-align: center;
     }
@@ -463,35 +435,6 @@
       <div class="hero-buttons">
         <a href="oncology_ui.html" class="btn-primary">Open the Assistant →</a>
         <a href="#how" class="btn-secondary">See how it works</a>
-      </div>
-    </div>
-
-    <!-- Terminal card (desktop only) -->
-    <div class="hero-right">
-      <div class="terminal">
-        <div class="terminal-bar">
-          <div class="dot dot-r"></div>
-          <div class="dot dot-y"></div>
-          <div class="dot dot-g"></div>
-          <span class="terminal-title">oncology-ai / response.json</span>
-        </div>
-        <div class="terminal-body">
-          <span class="t-line t-comment">// Real response from the system</span>
-          <span class="t-line">{</span>
-          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"confidence"</span>: <span class="t-val">"high"</span>,</span>
-          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"validated"</span>: <span class="t-val">true</span>,</span>
-          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"route"</span>: <span class="t-val">"conceptual"</span>,</span>
-          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"citations"</span>: [</span>
-          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="t-key">"type"</span>: <span class="t-val">"pdf"</span>,</span>
-          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"source"</span>: <span class="t-val">"NCCN Breast"</span> },</span>
-          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="t-key">"type"</span>: <span class="t-val">"pubmed"</span>,</span>
-          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"pmid"</span>: <span class="t-val">"35665782"</span> },</span>
-          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="t-key">"type"</span>: <span class="t-val">"trial"</span>,</span>
-          <span class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"id"</span>: <span class="t-val">"NCT04494425"</span> }</span>
-          <span class="t-line">&nbsp;&nbsp;],</span>
-          <span class="t-line">&nbsp;&nbsp;<span class="t-key">"refused"</span>: <span class="t-val">false</span></span>
-          <span class="t-line">} <span class="t-cursor"></span></span>
-        </div>
       </div>
     </div>
   </div>
