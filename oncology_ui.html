@@ -669,7 +669,60 @@ async function submitRegister() {
 }
 
 // ── Google login ──────────────────────────────────────────────────────────
-function googleLogin() { window.location.replace(`${API}/auth/google`); }
+function googleLogin() {
+  const width  = 480, height = 640;
+  const left   = window.screenX + (window.outerWidth  - width)  / 2;
+  const top    = window.screenY + (window.outerHeight - height) / 2.5;
+  const popup  = window.open(
+    `${API}/auth/google`,
+    'onco_google_login',
+    `width=${width},height=${height},left=${left},top=${top}`
+  );
+
+  if (!popup) {
+    // Popup blocked by the browser — fall back to a full-page redirect.
+    window.location.replace(`${API}/auth/google`);
+    return;
+  }
+
+  // Block the main page while the popup handles sign-in.
+  document.getElementById('loginScreen').style.display     = 'none';
+  document.getElementById('registerScreen').style.display  = 'none';
+  document.getElementById('authThemeToggle').style.display = 'none';
+  document.getElementById('authLoadingOverlay').classList.add('open');
+
+  // If the user closes the popup without finishing sign-in, restore the login screen.
+  const checkClosed = setInterval(() => {
+    if (popup.closed) {
+      clearInterval(checkClosed);
+      if (!authToken) {
+        document.getElementById('authLoadingOverlay').classList.remove('open');
+        showLogin();
+      }
+    }
+  }, 400);
+}
+
+// The popup (served from the API origin) posts the token back here once
+// Google sign-in finishes, then closes itself — the main page never
+// navigates to Google at all, so nothing shows up in back-history.
+window.addEventListener('message', function (event) {
+  if (event.origin !== API) return;
+  if (!event.data || event.data.type !== 'onco-google-auth' || !event.data.token) return;
+
+  authToken = event.data.token;
+  fetch(`${API}/history`, { headers: { 'Authorization': `Bearer ${authToken}` } })
+    .then(r => { if (!r.ok) throw new Error('session lookup failed'); return r.json(); })
+    .then(data => {
+      document.getElementById('authLoadingOverlay').classList.remove('open');
+      hideAuthScreens(data.user || 'User', '');
+    })
+    .catch(() => {
+      document.getElementById('authLoadingOverlay').classList.remove('open');
+      authToken = null;
+      showLogin();
+    });
+});
 
 function checkUrlToken() {
   const params = new URLSearchParams(window.location.search);

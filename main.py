@@ -6,7 +6,7 @@ from typing import Any
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
@@ -32,6 +32,7 @@ COLLECTION     = "oncology_docs"
 VECTOR_SIZE    = 384
 
 FRONTEND_URL = "https://antony101thomas.github.io/oncology-ai-assistant/oncology_ui.html"
+FRONTEND_ORIGIN = "https://antony101thomas.github.io"
 
 app    = FastAPI(title="ONCO AI")
 qdrant = QdrantClient(":memory:")
@@ -199,7 +200,31 @@ async def google_callback(request: Request):
             )
 
     token = create_token(user["id"])
-    return RedirectResponse(url=f"{FRONTEND_URL}?token={token}")
+
+    # This endpoint is normally opened in a small popup window by the
+    # frontend (see googleLogin() in oncology_ui.html), so the user's main
+    # tab never navigates to Google and nothing shows up in its back-history.
+    # We hand the token back to that opener window via postMessage and close
+    # the popup. If there's no opener (e.g. popups were blocked and the
+    # frontend fell back to a full-page redirect), we fall back to the old
+    # redirect-with-token-in-URL behaviour instead.
+    html = f"""<!DOCTYPE html>
+<html>
+<body>
+<script>
+  if (window.opener) {{
+    window.opener.postMessage(
+      {{ type: "onco-google-auth", token: "{token}" }},
+      "{FRONTEND_ORIGIN}"
+    );
+    window.close();
+  }} else {{
+    window.location.replace("{FRONTEND_URL}?token={token}");
+  }}
+</script>
+</body>
+</html>"""
+    return HTMLResponse(content=html)
 
 
 @app.get("/history")
