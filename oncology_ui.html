@@ -663,15 +663,12 @@ function checkUrlToken() {
 
 // ── Logout ────────────────────────────────────────────────────────────────
 function logout() {
-  closeProfileMenu();
   authToken = null;
   currentUserName = ''; currentUserEmail = '';
   sessionHistory.length = 0;
-  document.getElementById('profileWrap').style.display = 'none';
-  document.getElementById('messages').innerHTML      = '';
-  document.getElementById('messages').style.display  = 'none';
-  document.getElementById('welcome').style.display   = 'flex';
-  showLogin();
+  // Fully navigate to the landing page (replace, so the old logged-in
+  // app state and any OAuth redirect hops are dropped from back-history).
+  window.location.replace('index.html');
 }
 
 // ── Load history from server ──────────────────────────────────────────────
@@ -966,6 +963,16 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 // ── Init ──────────────────────────────────────────────────────────────────
 checkUrlToken();
+
+// If the browser restores this page from back/forward cache (e.g. pressing
+// "back" after logging out or mid-way through the Google OAuth redirect)
+// and we're not actually signed in, bounce straight to the landing page
+// instead of showing a stale or confusing screen.
+window.addEventListener('pageshow', function (event) {
+  if (event.persisted && !authToken) {
+    window.location.replace('index.html');
+  }
+});
 
 // Deep-link support: oncology_ui.html?view=register opens the register screen directly
 // (used by the guest page's "Sign In" / "Register" buttons in its top bar)
