@@ -648,7 +648,7 @@ async function submitRegister() {
 }
 
 // ── Google login ──────────────────────────────────────────────────────────
-function googleLogin() { window.location.href = `${API}/auth/google`; }
+function googleLogin() { window.location.replace(`${API}/auth/google`); }
 
 function checkUrlToken() {
   const params = new URLSearchParams(window.location.search);
