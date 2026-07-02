@@ -37,6 +37,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # Password-reset tokens are single-purpose and must never be usable
+        # as a regular auth token.
+        if payload.get("purpose") is not None:
+            raise JWTError("Not a valid auth token")
         user_id = int(payload.get("sub"))
     except (JWTError, TypeError):
         raise HTTPException(
@@ -47,6 +51,33 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+# ── Password reset tokens ──────────────────────────────────────────
+# Short-lived, single-purpose JWTs used for the "forgot password" flow.
+# No separate database table is needed — the token itself carries the
+# user id and an expiry, and is only ever valid for password resets
+# (never accepted as a normal auth token, see get_current_user above).
+RESET_TOKEN_EXPIRE_MINUTES = 30
+
+def create_reset_token(user_id: int) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=RESET_TOKEN_EXPIRE_MINUTES)
+    return jwt.encode(
+        {"sub": str(user_id), "purpose": "password_reset", "exp": expire},
+        SECRET_KEY, algorithm=ALGORITHM
+    )
+
+def verify_reset_token(token: str) -> int:
+    """Decode a password-reset token and return the user_id, or raise ValueError."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
+        raise ValueError("This reset link is invalid or has expired.")
+    if payload.get("purpose") != "password_reset":
+        raise ValueError("This reset link is invalid.")
+    try:
+        return int(payload.get("sub"))
+    except (TypeError, ValueError):
+        raise ValueError("This reset link is invalid.")
 
 # ── Google OAuth ──────────────────────────────────────────────────
 from authlib.integrations.starlette_client import OAuth

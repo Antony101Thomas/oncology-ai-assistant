@@ -216,6 +216,7 @@
     .auth-switch span { color: var(--teal); cursor: pointer; font-weight: 600; }
     .auth-switch span:hover { text-decoration: underline; }
     .auth-error { font-size: 11px; color: var(--danger); text-align: center; margin-top: 8px; min-height: 16px; }
+    .auth-success { font-size: 11.5px; color: var(--success); text-align: center; margin-top: 10px; line-height: 1.5; }
 
     /* Auth theme toggle */
     .auth-theme-toggle { position: absolute; top: 16px; right: 16px; display: flex; align-items: center; gap: 6px; }
@@ -281,6 +282,9 @@
       <label>Password</label>
       <input type="password" id="loginPassword" name="onco-login-secret" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
              onkeydown="if(event.key==='Enter') submitLogin()" />
+      <div style="text-align:right;margin-top:4px;">
+        <span style="font-size:11.5px;color:var(--teal);cursor:pointer;font-weight:600;" onclick="showForgotPassword()">Forgot password?</span>
+      </div>
     </div>
     <button class="auth-btn" id="loginBtn" onclick="submitLogin()">Sign In</button>
     <div class="auth-error" id="loginError"></div>
@@ -332,6 +336,45 @@
       Continue with Google
     </button>
     <div class="auth-switch">Already have an account? <span onclick="showLogin()">Sign In</span></div>
+  </div>
+</div>
+
+<!-- ── Forgot Password Screen ── -->
+<div class="auth-screen" id="forgotScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="data:image/png;base64,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" alt="ONCO AI" style="width:48px;height:48px;border-radius:14px;object-fit:cover;margin-bottom:10px;">
+      <div class="auth-title">ONCO AI</div>
+      <div class="auth-sub">Reset your password</div>
+    </div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="forgotEmail" name="onco-forgot-id" placeholder="you@example.com" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')"
+             onkeydown="if(event.key==='Enter') submitForgotPassword()" />
+    </div>
+    <button class="auth-btn" id="forgotBtn" onclick="submitForgotPassword()">Send Reset Link</button>
+    <div class="auth-error" id="forgotError"></div>
+    <div class="auth-success" id="forgotSuccess" style="display:none;"></div>
+    <div class="auth-switch" style="margin-top:18px;">Remembered it? <span onclick="showLogin()">Sign In</span></div>
+  </div>
+</div>
+
+<!-- ── Reset Password Screen (opened via the emailed link) ── -->
+<div class="auth-screen" id="resetScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="data:image/png;base64,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" alt="ONCO AI" style="width:48px;height:48px;border-radius:14px;object-fit:cover;margin-bottom:10px;">
+      <div class="auth-title">ONCO AI</div>
+      <div class="auth-sub">Choose a new password</div>
+    </div>
+    <div class="auth-field">
+      <label>New Password</label>
+      <input type="password" id="resetPassword" name="onco-reset-secret" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
+             onkeydown="if(event.key==='Enter') submitResetPassword()" />
+    </div>
+    <button class="auth-btn" id="resetBtn" onclick="submitResetPassword()">Update Password</button>
+    <div class="auth-error" id="resetError"></div>
+    <div class="auth-success" id="resetSuccess" style="display:none;"></div>
   </div>
 </div>
 
@@ -567,39 +610,71 @@ function openHelp()  { document.getElementById('helpModal').classList.add('open'
 function closeHelp() { document.getElementById('helpModal').classList.remove('open'); }
 
 // ── Auth screens ───────────────────────────────────────────────────────────
-function showLogin() {
-  document.getElementById('loginScreen').style.display    = 'flex';
+function hideAllAuthScreens() {
+  document.getElementById('loginScreen').style.display    = 'none';
   document.getElementById('registerScreen').style.display = 'none';
+  document.getElementById('forgotScreen').style.display   = 'none';
+  document.getElementById('resetScreen').style.display    = 'none';
+}
+
+function showLogin() {
+  hideAllAuthScreens();
+  document.getElementById('loginScreen').style.display    = 'flex';
   document.getElementById('authThemeToggle').style.display = 'flex';
   document.getElementById('loginError').textContent       = '';
-  setAuthLoading(false);
+  setAuthLoading(false, 'login');
 }
 
 function showRegister() {
+  hideAllAuthScreens();
   document.getElementById('registerScreen').style.display = 'flex';
-  document.getElementById('loginScreen').style.display    = 'none';
   document.getElementById('authThemeToggle').style.display = 'flex';
   document.getElementById('registerError').textContent    = '';
   setAuthLoading(false, 'register');
 }
 
+function showForgotPassword() {
+  hideAllAuthScreens();
+  document.getElementById('forgotScreen').style.display    = 'flex';
+  document.getElementById('authThemeToggle').style.display = 'flex';
+  document.getElementById('forgotError').textContent       = '';
+  document.getElementById('forgotSuccess').style.display   = 'none';
+  setAuthLoading(false, 'forgot');
+}
+
+function showResetPassword() {
+  hideAllAuthScreens();
+  document.getElementById('resetScreen').style.display     = 'flex';
+  document.getElementById('authThemeToggle').style.display = 'flex';
+  document.getElementById('resetError').textContent        = '';
+  document.getElementById('resetSuccess').style.display    = 'none';
+  setAuthLoading(false, 'reset');
+}
+
+const AUTH_SCREEN_META = {
+  login:    { btnId: 'loginBtn',    idleLabel: 'Sign In',            loadingLabel: 'Signing in…' },
+  register: { btnId: 'registerBtn', idleLabel: 'Create Account',     loadingLabel: 'Creating account…' },
+  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Send Reset Link',    loadingLabel: 'Sending…' },
+  reset:    { btnId: 'resetBtn',    idleLabel: 'Update Password',    loadingLabel: 'Updating…' },
+};
+
 function setAuthLoading(loading, screen = 'login') {
-  const btn = document.getElementById(screen === 'login' ? 'loginBtn' : 'registerBtn');
+  const meta = AUTH_SCREEN_META[screen];
+  const btn = document.getElementById(meta.btnId);
   const inputs = btn.closest('.auth-card').querySelectorAll('input');
   if (loading) {
     btn.disabled = true;
-    btn.innerHTML = '<div class="spin"></div>' + (screen === 'login' ? 'Signing in…' : 'Creating account…');
+    btn.innerHTML = '<div class="spin"></div>' + meta.loadingLabel;
     inputs.forEach(i => i.disabled = true);
   } else {
     btn.disabled = false;
-    btn.innerHTML = screen === 'login' ? 'Sign In' : 'Create Account';
+    btn.innerHTML = meta.idleLabel;
     inputs.forEach(i => i.disabled = false);
   }
 }
 
 function hideAuthScreens(userName, userEmail) {
-  document.getElementById('loginScreen').style.display    = 'none';
-  document.getElementById('registerScreen').style.display = 'none';
+  hideAllAuthScreens();
   document.getElementById('authThemeToggle').style.display = 'none';
 
   currentUserName  = userName  || 'User';
@@ -665,6 +740,80 @@ async function submitRegister() {
   } catch {
     errEl.textContent = 'Cannot reach server. Is FastAPI running?';
     setAuthLoading(false, 'register');
+  }
+}
+
+// ── Forgot / Reset password ──────────────────────────────────────────────
+async function submitForgotPassword() {
+  const email   = document.getElementById('forgotEmail').value.trim();
+  const errEl   = document.getElementById('forgotError');
+  const okEl    = document.getElementById('forgotSuccess');
+  errEl.textContent = '';
+  okEl.style.display = 'none';
+  if (!email) { errEl.textContent = 'Please enter your email.'; return; }
+
+  setAuthLoading(true, 'forgot');
+  try {
+    const res  = await fetch(`${API}/forgot-password`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json().catch(() => ({}));
+    setAuthLoading(false, 'forgot');
+    if (!res.ok) { errEl.textContent = data.detail || 'Something went wrong. Please try again.'; return; }
+    okEl.textContent = data.message || 'If an account exists for that email, a password reset link has been sent.';
+    okEl.style.display = 'block';
+    document.getElementById('forgotEmail').value = '';
+  } catch {
+    setAuthLoading(false, 'forgot');
+    errEl.textContent = 'Cannot reach server. Is FastAPI running?';
+  }
+}
+
+let pendingResetToken = null;
+
+async function submitResetPassword() {
+  const password = document.getElementById('resetPassword').value;
+  const errEl    = document.getElementById('resetError');
+  const okEl     = document.getElementById('resetSuccess');
+  errEl.textContent = '';
+  okEl.style.display = 'none';
+  if (!password) { errEl.textContent = 'Please enter a new password.'; return; }
+  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if (!pendingResetToken) { errEl.textContent = 'This reset link is invalid. Please request a new one.'; return; }
+
+  setAuthLoading(true, 'reset');
+  try {
+    const res  = await fetch(`${API}/reset-password`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: pendingResetToken, new_password: password })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAuthLoading(false, 'reset');
+      errEl.textContent = data.detail || 'This reset link is invalid or has expired.';
+      return;
+    }
+    okEl.textContent = 'Password updated! You can now sign in with your new password.';
+    okEl.style.display = 'block';
+    document.getElementById('resetPassword').value = '';
+    document.getElementById('resetBtn').style.display = 'none';
+    setTimeout(showLogin, 2500);
+  } catch {
+    setAuthLoading(false, 'reset');
+    errEl.textContent = 'Cannot reach server. Is FastAPI running?';
+  }
+}
+
+// If the login page was opened via the emailed reset link
+// (oncology_ui.html?reset_token=...), jump straight to the reset screen.
+function checkResetTokenInUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('reset_token');
+  if (token) {
+    pendingResetToken = token;
+    window.history.replaceState({}, '', window.location.pathname);
+    showResetPassword();
   }
 }
 
@@ -1055,6 +1204,7 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 // ── Init ──────────────────────────────────────────────────────────────────
 checkUrlToken();
+checkResetTokenInUrl();
 
 // If the browser restores this page from back/forward cache (e.g. pressing
 // "back" after logging out or mid-way through the Google OAuth redirect)

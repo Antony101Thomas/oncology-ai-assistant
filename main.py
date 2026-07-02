@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+import requests
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,13 +13,16 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from starlette.middleware.sessions import SessionMiddleware
 
-from auth import create_token, get_current_user, hash_password, oauth, verify_password
+from auth import (create_reset_token, create_token, get_current_user,
+                  hash_password, oauth, verify_password, verify_reset_token)
 from bm25_search import build_bm25_index
 from chunker import chunk_pages
 from database import (create_user, get_user_by_email,
-                      get_user_by_google_id, save_chat, get_user_history)
+                      get_user_by_google_id, save_chat, get_user_history,
+                      update_user_password)
 from embedder import embed_texts
-from models import LoginRequest, RegisterRequest, Token
+from models import (ForgotPasswordRequest, LoginRequest, RegisterRequest,
+                    ResetPasswordRequest, Token)
 from pdf_extractor import extract_pdf_pages
 from rag_agent import execute_rag_query
 
@@ -33,6 +37,13 @@ VECTOR_SIZE    = 384
 
 FRONTEND_URL = "https://antony101thomas.github.io/oncology-ai-assistant/oncology_ui.html"
 FRONTEND_ORIGIN = "https://antony101thomas.github.io"
+
+# ── Password-reset email (Resend) ────────────────────────────────────────
+# If RESEND_API_KEY isn't set, reset links are just printed to the server
+# logs instead of emailed — handy for local development before Resend is
+# configured, without blocking the rest of the feature.
+RESEND_API_KEY    = os.getenv("RESEND_API_KEY")
+RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "ONCO AI <onboarding@resend.dev>")
 
 app    = FastAPI(title="ONCO AI")
 qdrant = QdrantClient(":memory:")
@@ -172,6 +183,65 @@ def login(req: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     token = create_token(user["id"])
     return Token(access_token=token, user_name=user["name"], user_email=user["email"])
+
+
+def send_reset_email(to_email: str, reset_link: str) -> None:
+    """Send a password-reset email via the Resend API. If Resend isn't
+    configured yet (no RESEND_API_KEY), just log the link instead of
+    failing — keeps the feature usable during setup/local development."""
+    if not RESEND_API_KEY:
+        print(f"[Password Reset] RESEND_API_KEY not set. Reset link for {to_email}: {reset_link}")
+        return
+    try:
+        requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}"},
+            json={
+                "from": RESEND_FROM_EMAIL,
+                "to": [to_email],
+                "subject": "Reset your ONCO AI password",
+                "html": (
+                    "<p>We received a request to reset your ONCO AI password.</p>"
+                    f"<p><a href=\"{reset_link}\">Click here to choose a new password</a></p>"
+                    "<p>This link expires in 30 minutes. If you didn't request this, "
+                    "you can safely ignore this email.</p>"
+                ),
+            },
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        print(f"[Password Reset] Failed to send email via Resend: {exc}")
+
+
+@app.post("/forgot-password")
+def forgot_password(req: ForgotPasswordRequest) -> dict[str, Any]:
+    user = get_user_by_email(req.email)
+    # Only local (email/password) accounts have a password to reset. We
+    # still return the same generic message either way so this endpoint
+    # can't be used to check which emails are registered.
+    if user and user.get("provider") == "local":
+        reset_token = create_reset_token(user["id"])
+        reset_link  = f"{FRONTEND_URL}?reset_token={reset_token}"
+        send_reset_email(user["email"], reset_link)
+    return {"message": "If an account exists for that email, a password reset link has been sent."}
+
+
+@app.post("/reset-password")
+def reset_password(req: ResetPasswordRequest) -> dict[str, Any]:
+    try:
+        user_id = verify_reset_token(req.token)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+
+    hashed  = hash_password(req.new_password)
+    updated = update_user_password(user_id, hashed)
+    if not updated:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    return {"message": "Password updated successfully. You can now sign in."}
 
 
 @app.get("/auth/google")

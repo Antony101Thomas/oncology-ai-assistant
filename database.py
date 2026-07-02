@@ -132,6 +132,18 @@ def get_user_by_google_id(google_id: str) -> dict | None:
     return _row_to_dict(row)
 
 
+def update_user_password(user_id: int, hashed_password: str) -> bool:
+    """
+    Update a user's hashed password (used by the forgot-password flow).
+    Returns True if a row was updated, False if the user_id didn't exist.
+    """
+    with engine.begin() as conn:
+        result = conn.execute(text("""
+            UPDATE users SET hashed_password = :hashed_password WHERE id = :id
+        """), {"hashed_password": hashed_password, "id": user_id})
+    return result.rowcount > 0
+
+
 # ── Chat history operations ───────────────────────────────────────────────────
 
 def save_chat(user_id: int, question: str, answer: str,
