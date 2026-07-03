@@ -75,6 +75,16 @@ def create_tables() -> None:
             )
         """))
 
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp_hash TEXT
+        """))
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp_expires TEXT
+        """))
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp_attempts INTEGER NOT NULL DEFAULT 0
+        """))
+
     print("[DB] Tables ready on Supabase Postgres")
 
 
@@ -142,6 +152,41 @@ def update_user_password(user_id: int, hashed_password: str) -> bool:
             UPDATE users SET hashed_password = :hashed_password WHERE id = :id
         """), {"hashed_password": hashed_password, "id": user_id})
     return result.rowcount > 0
+
+
+def set_reset_otp(user_id: int, otp_hash: str, expires_at: str) -> None:
+    """Store a fresh OTP hash + expiry for this user, resetting attempt count."""
+    with engine.begin() as conn:
+        conn.execute(text("""
+            UPDATE users
+            SET reset_otp_hash = :otp_hash, reset_otp_expires = :expires_at, reset_otp_attempts = 0
+            WHERE id = :id
+        """), {"otp_hash": otp_hash, "expires_at": expires_at, "id": user_id})
+
+
+def get_reset_otp(user_id: int) -> dict | None:
+    with engine.connect() as conn:
+        row = conn.execute(text("""
+            SELECT reset_otp_hash, reset_otp_expires, reset_otp_attempts
+            FROM users WHERE id = :id
+        """), {"id": user_id}).fetchone()
+    return _row_to_dict(row)
+
+
+def increment_otp_attempts(user_id: int) -> None:
+    with engine.begin() as conn:
+        conn.execute(text("""
+            UPDATE users SET reset_otp_attempts = reset_otp_attempts + 1 WHERE id = :id
+        """), {"id": user_id})
+
+
+def clear_reset_otp(user_id: int) -> None:
+    """Wipe the OTP after a successful reset or when issuing a fresh one is not needed."""
+    with engine.begin() as conn:
+        conn.execute(text("""
+            UPDATE users SET reset_otp_hash = NULL, reset_otp_expires = NULL, reset_otp_attempts = 0
+            WHERE id = :id
+        """), {"id": user_id})
 
 
 # ── Chat history operations ───────────────────────────────────────────────────
