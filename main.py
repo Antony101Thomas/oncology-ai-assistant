@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -13,16 +14,18 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from starlette.middleware.sessions import SessionMiddleware
 
-from auth import (create_reset_token, create_token, get_current_user,
-                  hash_password, oauth, verify_password, verify_reset_token)
+from auth import (create_reset_token, create_token, generate_otp, get_current_user,
+                  hash_otp, hash_password, oauth, verify_password, verify_reset_token,
+                  OTP_EXPIRE_MINUTES, OTP_MAX_ATTEMPTS)
 from bm25_search import build_bm25_index
 from chunker import chunk_pages
-from database import (create_user, get_user_by_email,
+from database import (create_user, get_user_by_email, get_reset_otp,
                       get_user_by_google_id, save_chat, get_user_history,
+                      set_reset_otp, increment_otp_attempts, clear_reset_otp,
                       update_user_password)
 from embedder import embed_texts
 from models import (ForgotPasswordRequest, LoginRequest, RegisterRequest,
-                    ResetPasswordRequest, Token)
+                    ResetPasswordRequest, Token, VerifyOtpRequest)
 from pdf_extractor import extract_pdf_pages
 from rag_agent import execute_rag_query
 
@@ -185,12 +188,9 @@ def login(req: LoginRequest):
     return Token(access_token=token, user_name=user["name"], user_email=user["email"])
 
 
-def send_reset_email(to_email: str, reset_link: str) -> None:
-    """Send a password-reset email via the Resend API. If Resend isn't
-    configured yet (no RESEND_API_KEY), just log the link instead of
-    failing — keeps the feature usable during setup/local development."""
+def send_otp_email(to_email: str, otp: str) -> None:
     if not RESEND_API_KEY:
-        print(f"[Password Reset] RESEND_API_KEY not set. Reset link for {to_email}: {reset_link}")
+        print(f"[Password Reset] RESEND_API_KEY not set. OTP for {to_email}: {otp}")
         return
     try:
         requests.post(
@@ -199,18 +199,18 @@ def send_reset_email(to_email: str, reset_link: str) -> None:
             json={
                 "from": RESEND_FROM_EMAIL,
                 "to": [to_email],
-                "subject": "Reset your ONCO AI password",
+                "subject": "Your ONCO AI password reset code",
                 "html": (
                     "<p>We received a request to reset your ONCO AI password.</p>"
-                    f"<p><a href=\"{reset_link}\">Click here to choose a new password</a></p>"
-                    "<p>This link expires in 30 minutes. If you didn't request this, "
+                    f"<p style=\"font-size:28px;font-weight:700;letter-spacing:4px;\">{otp}</p>"
+                    "<p>This code expires in 10 minutes. If you didn't request this, "
                     "you can safely ignore this email.</p>"
                 ),
             },
             timeout=10,
         )
     except requests.RequestException as exc:
-        print(f"[Password Reset] Failed to send email via Resend: {exc}")
+        print(f"[Password Reset] Failed to send OTP email via Resend: {exc}")
 
 
 @app.post("/forgot-password")
@@ -220,10 +220,39 @@ def forgot_password(req: ForgotPasswordRequest) -> dict[str, Any]:
     # still return the same generic message either way so this endpoint
     # can't be used to check which emails are registered.
     if user and user.get("provider") == "local":
-        reset_token = create_reset_token(user["id"])
-        reset_link  = f"{FRONTEND_URL}?reset_token={reset_token}"
-        send_reset_email(user["email"], reset_link)
-    return {"message": "If an account exists for that email, a password reset link has been sent."}
+        otp        = generate_otp()
+        otp_hash   = hash_otp(otp)
+        expires_at = (datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRE_MINUTES)).isoformat()
+        set_reset_otp(user["id"], otp_hash, expires_at)
+        send_otp_email(user["email"], otp)
+    return {"message": "If an account exists for that email, a reset code has been sent."}
+
+
+@app.post("/verify-otp")
+def verify_otp(req: VerifyOtpRequest) -> dict[str, Any]:
+    generic_error = "Invalid or expired code."
+    user = get_user_by_email(req.email)
+    if not user or user.get("provider") != "local":
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    record = get_reset_otp(user["id"])
+    if not record or not record.get("reset_otp_hash"):
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    if record["reset_otp_attempts"] >= OTP_MAX_ATTEMPTS:
+        raise HTTPException(status_code=429, detail="Too many attempts. Please request a new code.")
+
+    expires_at = datetime.fromisoformat(record["reset_otp_expires"])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    if hash_otp(req.otp.strip()) != record["reset_otp_hash"]:
+        increment_otp_attempts(user["id"])
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    clear_reset_otp(user["id"])
+    token = create_reset_token(user["id"])
+    return {"token": token}
 
 
 @app.post("/reset-password")

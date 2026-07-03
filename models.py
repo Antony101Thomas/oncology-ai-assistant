@@ -19,6 +19,10 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
+class VerifyOtpRequest(BaseModel):
+    email: str
+    otp: str
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

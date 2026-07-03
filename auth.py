@@ -1,6 +1,7 @@
 # auth.py
 
 import os
+import secrets
 import bcrypt
 from datetime import datetime, timezone, timedelta
 from jose import JWTError, jwt
@@ -78,6 +79,22 @@ def verify_reset_token(token: str) -> int:
         return int(payload.get("sub"))
     except (TypeError, ValueError):
         raise ValueError("This reset link is invalid.")
+
+# ── OTP helpers ─────────────────────────────────────────────────────
+# Used alongside (or instead of) the reset token above for a one-time-code
+# style "forgot password" flow, e.g. emailing a 6-digit code the user types
+# in rather than clicking a link.
+OTP_EXPIRE_MINUTES = 10
+OTP_MAX_ATTEMPTS   = 5
+
+def generate_otp() -> str:
+    """6-digit numeric OTP, cryptographically random."""
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+def hash_otp(otp: str) -> str:
+    """We never store the raw OTP — only its hash, same principle as passwords."""
+    import hashlib
+    return hashlib.sha256(otp.encode("utf-8")).hexdigest()
 
 # ── Google OAuth ──────────────────────────────────────────────────
 from authlib.integrations.starlette_client import OAuth

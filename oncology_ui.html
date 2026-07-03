@@ -359,6 +359,29 @@
   </div>
 </div>
 
+<!-- ── OTP Verification Screen ── -->
+<div class="auth-screen" id="otpScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><i class="ti ti-shield-lock"></i></div>
+      <div class="auth-title">ONCO AI</div>
+      <div class="auth-sub" id="otpSubText">Enter the 6-digit code we sent you</div>
+    </div>
+    <div class="auth-field">
+      <label>Verification Code</label>
+      <input type="text" id="otpCode" name="onco-otp-code" placeholder="123456" maxlength="6"
+             inputmode="numeric" autocomplete="one-time-code" style="letter-spacing:6px;font-size:18px;text-align:center;"
+             onkeydown="if(event.key==='Enter') submitOtp()" />
+    </div>
+    <button class="auth-btn" id="otpBtn" onclick="submitOtp()">Verify Code</button>
+    <div class="auth-error" id="otpError"></div>
+    <div class="auth-switch" style="margin-top:18px;">
+      Didn't get it? <span onclick="resendOtp()">Resend code</span>
+    </div>
+    <div class="auth-switch">Wrong email? <span onclick="showForgotPassword()">Go back</span></div>
+  </div>
+</div>
+
 <!-- ── Reset Password Screen (opened via the emailed link) ── -->
 <div class="auth-screen" id="resetScreen" style="display:none;">
   <div class="auth-card">
@@ -614,6 +637,7 @@ function hideAllAuthScreens() {
   document.getElementById('loginScreen').style.display    = 'none';
   document.getElementById('registerScreen').style.display = 'none';
   document.getElementById('forgotScreen').style.display   = 'none';
+  document.getElementById('otpScreen').style.display      = 'none';
   document.getElementById('resetScreen').style.display    = 'none';
 }
 
@@ -651,10 +675,23 @@ function showResetPassword() {
   setAuthLoading(false, 'reset');
 }
 
+let pendingOtpEmail = null;
+
+function showOtp(email) {
+  hideAllAuthScreens();
+  document.getElementById('otpScreen').style.display       = 'flex';
+  document.getElementById('authThemeToggle').style.display = 'flex';
+  document.getElementById('otpError').textContent          = '';
+  document.getElementById('otpCode').value                 = '';
+  document.getElementById('otpSubText').textContent        = `Enter the 6-digit code sent to ${email}`;
+  setAuthLoading(false, 'otp');
+}
+
 const AUTH_SCREEN_META = {
   login:    { btnId: 'loginBtn',    idleLabel: 'Sign In',            loadingLabel: 'Signing in…' },
   register: { btnId: 'registerBtn', idleLabel: 'Create Account',     loadingLabel: 'Creating account…' },
   forgot:   { btnId: 'forgotBtn',   idleLabel: 'Send Reset Link',    loadingLabel: 'Sending…' },
+  otp:      { btnId: 'otpBtn',      idleLabel: 'Verify Code',        loadingLabel: 'Verifying…' },
   reset:    { btnId: 'resetBtn',    idleLabel: 'Update Password',    loadingLabel: 'Updating…' },
 };
 
@@ -743,13 +780,11 @@ async function submitRegister() {
   }
 }
 
-// ── Forgot / Reset password ──────────────────────────────────────────────
+// ── Forgot / OTP / Reset password ────────────────────────────────────────
 async function submitForgotPassword() {
-  const email   = document.getElementById('forgotEmail').value.trim();
-  const errEl   = document.getElementById('forgotError');
-  const okEl    = document.getElementById('forgotSuccess');
+  const email = document.getElementById('forgotEmail').value.trim();
+  const errEl = document.getElementById('forgotError');
   errEl.textContent = '';
-  okEl.style.display = 'none';
   if (!email) { errEl.textContent = 'Please enter your email.'; return; }
 
   setAuthLoading(true, 'forgot');
@@ -761,12 +796,50 @@ async function submitForgotPassword() {
     const data = await res.json().catch(() => ({}));
     setAuthLoading(false, 'forgot');
     if (!res.ok) { errEl.textContent = data.detail || 'Something went wrong. Please try again.'; return; }
-    okEl.textContent = data.message || 'If an account exists for that email, a password reset link has been sent.';
-    okEl.style.display = 'block';
-    document.getElementById('forgotEmail').value = '';
+    pendingOtpEmail = email;
+    showOtp(email);
   } catch {
     setAuthLoading(false, 'forgot');
     errEl.textContent = 'Cannot reach server. Is FastAPI running?';
+  }
+}
+
+async function submitOtp() {
+  const otp   = document.getElementById('otpCode').value.trim();
+  const errEl = document.getElementById('otpError');
+  errEl.textContent = '';
+  if (!otp || otp.length !== 6) { errEl.textContent = 'Enter the 6-digit code.'; return; }
+  if (!pendingOtpEmail) { errEl.textContent = 'Session expired — please request a new code.'; return; }
+
+  setAuthLoading(true, 'otp');
+  try {
+    const res  = await fetch(`${API}/verify-otp`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingOtpEmail, otp })
+    });
+    const data = await res.json().catch(() => ({}));
+    setAuthLoading(false, 'otp');
+    if (!res.ok) { errEl.textContent = data.detail || 'Invalid or expired code.'; return; }
+    pendingResetToken = data.token;
+    showResetPassword();
+  } catch {
+    setAuthLoading(false, 'otp');
+    errEl.textContent = 'Cannot reach server. Is FastAPI running?';
+  }
+}
+
+async function resendOtp() {
+  if (!pendingOtpEmail) { showForgotPassword(); return; }
+  const errEl = document.getElementById('otpError');
+  errEl.textContent = 'Sending a new code…';
+  try {
+    await fetch(`${API}/forgot-password`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingOtpEmail })
+    });
+    errEl.textContent = 'A new code has been sent.';
+  } catch {
+    errEl.textContent = 'Cannot reach server.';
   }
 }
 
