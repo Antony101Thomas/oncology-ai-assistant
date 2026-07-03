@@ -199,9 +199,19 @@ def delete_user_history(user_id: int) -> int:
 
 
 # ── Startup call ──────────────────────────────────────────────────────────────
-# This runs automatically when database.py is imported,
-# ensuring tables always exist before anything else runs.
-create_tables()
+# This runs automatically when database.py is imported, ensuring tables
+# exist before anything else runs. Wrapped in try/except so a transient
+# Supabase outage (e.g. capacity/restart incidents) doesn't crash the whole
+# app at deploy time — routes that don't touch the DB (like /health) will
+# still come up, and DB-dependent routes will just fail individually with a
+# normal 500 until Supabase is reachable again, instead of the process
+# never starting at all.
+try:
+    create_tables()
+except Exception as exc:
+    print(f"[DB] WARNING: could not create/verify tables at startup: {exc}")
+    print("[DB] App will still start. DB-dependent routes will fail until "
+          "the database is reachable — retry once Supabase recovers.")
 
 
 # ── Quick self-test ───────────────────────────────────────────────────────────
