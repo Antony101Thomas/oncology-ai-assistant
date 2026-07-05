@@ -80,6 +80,58 @@ def verify_reset_token(token: str) -> int:
     except (TypeError, ValueError):
         raise ValueError("This reset link is invalid.")
 
+# ── Two-step verification (2FA) tokens ─────────────────────────────
+# "login_2fa" tokens are handed to the frontend right after a correct
+# password, before the OTP is confirmed — they only allow calling
+# /login/verify-otp, never /ask or anything else.
+LOGIN_2FA_TOKEN_EXPIRE_MINUTES = 10
+
+def create_login_2fa_token(user_id: int) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=LOGIN_2FA_TOKEN_EXPIRE_MINUTES)
+    return jwt.encode(
+        {"sub": str(user_id), "purpose": "login_2fa", "exp": expire},
+        SECRET_KEY, algorithm=ALGORITHM
+    )
+
+def verify_login_2fa_token(token: str) -> int:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
+        raise ValueError("This verification session has expired. Please sign in again.")
+    if payload.get("purpose") != "login_2fa":
+        raise ValueError("Invalid verification session.")
+    try:
+        return int(payload.get("sub"))
+    except (TypeError, ValueError):
+        raise ValueError("Invalid verification session.")
+
+# "login_approval" tokens are embedded in the "Approve this sign-in" email
+# link. They carry both the user id and the login_id of the pending
+# browser session so main.py can mark the right one approved.
+LOGIN_APPROVAL_TOKEN_EXPIRE_MINUTES = 15
+
+def create_login_approval_token(user_id: int, login_id: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=LOGIN_APPROVAL_TOKEN_EXPIRE_MINUTES)
+    return jwt.encode(
+        {"sub": str(user_id), "purpose": "login_approval", "login_id": login_id, "exp": expire},
+        SECRET_KEY, algorithm=ALGORITHM
+    )
+
+def verify_login_approval_token(token: str) -> tuple[int, str]:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
+        raise ValueError("This approval link is invalid or has expired.")
+    if payload.get("purpose") != "login_approval":
+        raise ValueError("This approval link is invalid.")
+    login_id = payload.get("login_id")
+    if not login_id:
+        raise ValueError("This approval link is invalid.")
+    try:
+        return int(payload.get("sub")), str(login_id)
+    except (TypeError, ValueError):
+        raise ValueError("This approval link is invalid.")
+
 # ── OTP helpers ─────────────────────────────────────────────────────
 # Used alongside (or instead of) the reset token above for a one-time-code
 # style "forgot password" flow, e.g. emailing a 6-digit code the user types

@@ -75,7 +75,7 @@
 
     /* Profile avatar + dropdown */
     .profile-wrap { position: relative; }
-    .profile-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; font-weight: 700; color: #fff; border: 2px solid transparent; transition: border-color 0.15s; user-select: none; }
+    .profile-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; font-weight: 700; color: #fff; border: 2px solid transparent; transition: border-color 0.15s; user-select: none; background-size: cover; background-position: center; }
     .profile-avatar:hover { border-color: var(--teal-glow); }
     .profile-initials { line-height: 1; }
 
@@ -83,9 +83,51 @@
     .profile-dropdown.open { display: block; animation: fadeDown 0.15s ease; }
     @keyframes fadeDown { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
 
-    .pd-header { padding: 8px 10px 10px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+    .pd-header { padding: 8px 10px 14px; border-bottom: 1px solid var(--border); margin-bottom: 4px; display: flex; justify-content: center; }
     .pd-name  { font-size: 13px; font-weight: 600; color: var(--text); }
     .pd-email { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+    /* ── Profile page ── */
+    .profile-wrapper { max-width: 560px; width: 100%; margin: 0 auto; padding: 32px 24px 60px; overflow-y: auto; }
+    .profile-hero { display: flex; align-items: center; gap: 18px; margin-bottom: 32px; }
+    .profile-photo-wrap { position: relative; width: 84px; height: 84px; flex-shrink: 0; }
+    .profile-photo { width: 84px; height: 84px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; color: #fff; background-size: cover; background-position: center; }
+    .profile-photo-edit { position: absolute; bottom: -2px; right: -2px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; color: var(--teal); transition: background 0.15s; }
+    .profile-photo-edit:hover { background: var(--teal-dim); }
+    .profile-hero-info .profile-hero-name { font-size: 18px; font-weight: 700; color: var(--text); }
+    .profile-hero-info .profile-hero-email { font-size: 12.5px; color: var(--text3); margin-top: 2px; }
+
+    .profile-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-bottom: 18px; }
+    .profile-section-title { font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .profile-section-desc { font-size: 12px; color: var(--text3); margin-bottom: 16px; line-height: 1.5; }
+    .profile-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .profile-field label { font-size: 11px; color: var(--text2); font-weight: 600; }
+    .profile-field input { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text); font-family: inherit; outline: none; transition: border-color 0.2s; }
+    .profile-field input:focus { border-color: var(--teal); }
+    .profile-field input:disabled { opacity: 0.55; cursor: not-allowed; }
+    .profile-btn-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+    .profile-btn { padding: 9px 18px; border-radius: 8px; background: #7c3aed; border: none; color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background 0.15s, opacity 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+    .profile-btn:hover:not(:disabled) { background: #6d28d9; }
+    .profile-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .profile-msg { font-size: 11.5px; margin-top: 8px; min-height: 15px; }
+    .profile-msg.ok  { color: var(--success); }
+    .profile-msg.err { color: var(--danger); }
+
+    /* 2FA toggle + method choice */
+    .tfa-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .tfa-row-label { font-size: 13px; color: var(--text); font-weight: 600; }
+    .tfa-row-sub   { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
+    .big-toggle { width: 42px; height: 24px; border-radius: 12px; background: var(--bg3); border: 1px solid var(--border2); cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+    .big-toggle.on { background: var(--teal); border-color: var(--teal); }
+    .big-toggle-thumb { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .big-toggle.on .big-toggle-thumb { transform: translateX(18px); }
+    .tfa-methods { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .tfa-method-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border2); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+    .tfa-method-option:hover { background: var(--teal-dim); }
+    .tfa-method-option.selected { border-color: var(--teal); background: var(--teal-dim); }
+    .tfa-method-option input { margin-top: 2px; accent-color: var(--teal); }
+    .tfa-method-option .tfa-method-title { font-size: 12.5px; font-weight: 600; color: var(--text); }
+    .tfa-method-option .tfa-method-desc  { font-size: 11px; color: var(--text3); margin-top: 2px; line-height: 1.5; }
     .pd-item { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 7px; font-size: 12px; color: var(--text2); cursor: pointer; transition: background 0.12s, color 0.12s; }
     .pd-item:hover { background: var(--teal-dim); color: var(--text); }
     .pd-item i { font-size: 14px; }
@@ -382,6 +424,42 @@
   </div>
 </div>
 
+<!-- ── Sign-in 2FA: emailed one-time code ── -->
+<div class="auth-screen" id="loginOtpScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><i class="ti ti-shield-lock"></i></div>
+      <div class="auth-title">ONCO AI</div>
+      <div class="auth-sub" id="loginOtpSubText">Enter the 6-digit code we sent you</div>
+    </div>
+    <div class="auth-field">
+      <label>Verification Code</label>
+      <input type="text" id="loginOtpCode" name="onco-login-otp-code" placeholder="123456" maxlength="6"
+             inputmode="numeric" autocomplete="one-time-code" style="letter-spacing:6px;font-size:18px;text-align:center;"
+             onkeydown="if(event.key==='Enter') submitLoginOtp()" />
+    </div>
+    <button class="auth-btn" id="loginOtpBtn" onclick="submitLoginOtp()">Verify & sign in</button>
+    <div class="auth-error" id="loginOtpError"></div>
+    <div class="auth-switch" style="margin-top:18px;">Wrong account? <span onclick="showLogin()">Go back</span></div>
+  </div>
+</div>
+
+<!-- ── Sign-in 2FA: emailed "it's me" approval link (waiting / polling) ── -->
+<div class="auth-screen" id="loginApprovalScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><i class="ti ti-mail-opened"></i></div>
+      <div class="auth-title">ONCO AI</div>
+      <div class="auth-sub" id="loginApprovalSubText">We emailed you an approval link.</div>
+    </div>
+    <div style="display:flex;justify-content:center;padding:10px 0 18px;">
+      <div class="spin" style="width:22px;height:22px;border-color:var(--border2);border-top-color:var(--teal);"></div>
+    </div>
+    <div class="auth-error" id="loginApprovalError"></div>
+    <div class="auth-switch" style="margin-top:6px;">Wrong account? <span onclick="cancelLoginApprovalWait()">Cancel and go back</span></div>
+  </div>
+</div>
+
 <!-- ── Reset Password Screen (opened via the emailed link) ── -->
 <div class="auth-screen" id="resetScreen" style="display:none;">
   <div class="auth-card">
@@ -397,9 +475,7 @@
     <div class="auth-field">
       <label>Confirm New Password</label>
       <input type="password" id="resetPasswordConfirm" name="onco-reset-confirm" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
-             oninput="checkPasswordsMatch()"
              onkeydown="if(event.key==='Enter') submitResetPassword()" />
-      <div id="resetMatchHint" style="font-size:11px;margin-top:4px;min-height:14px;"></div>
     </div>
     <button class="auth-btn" id="resetBtn" onclick="submitResetPassword()">Update Password</button>
     <div class="auth-error" id="resetError"></div>
@@ -467,11 +543,12 @@
         </div>
         <div class="profile-dropdown" id="profileDropdown">
           <div class="pd-header">
-            <div class="pd-name" id="pdName">–</div>
-            <div class="pd-email" id="pdEmail">–</div>
+            <div class="profile-avatar" id="profileAvatarLarge" style="width:44px;height:44px;font-size:17px;margin:0 auto;cursor:default;">
+              <span class="profile-initials" id="profileInitialsLarge">?</span>
+            </div>
           </div>
-          <div class="pd-item" onclick="closeProfileMenu(); showView('history')">
-            <i class="ti ti-history"></i> My History
+          <div class="pd-item" onclick="closeProfileMenu(); showView('profile')">
+            <i class="ti ti-user-circle"></i> My Profile
           </div>
           <div class="pd-item" onclick="closeProfileMenu(); openHelp()">
             <i class="ti ti-info-circle"></i> Help & About
@@ -595,6 +672,101 @@
       </div>
     </div>
 
+    <!-- Profile view -->
+    <div class="chat-area" id="view-profile" style="display:none;">
+      <div class="profile-wrapper">
+
+        <div class="profile-hero">
+          <div class="profile-photo-wrap">
+            <div class="profile-photo" id="profilePhotoBig">
+              <span id="profilePhotoInitialsBig">?</span>
+            </div>
+            <div class="profile-photo-edit" title="Change photo" onclick="document.getElementById('profilePhotoInput').click()">
+              <i class="ti ti-camera"></i>
+            </div>
+            <input type="file" id="profilePhotoInput" accept="image/*" hidden onchange="uploadProfilePhoto(event)" />
+          </div>
+          <div class="profile-hero-info">
+            <div class="profile-hero-name" id="profileHeroName">–</div>
+            <div class="profile-hero-email" id="profileHeroEmail">–</div>
+          </div>
+        </div>
+
+        <!-- Display name -->
+        <div class="profile-section">
+          <div class="profile-section-title"><i class="ti ti-id-badge" style="color:var(--teal);"></i> Display name</div>
+          <div class="profile-field">
+            <label>Full name</label>
+            <input type="text" id="profileNameInput" placeholder="Your name" />
+          </div>
+          <div class="profile-btn-row">
+            <button class="profile-btn" id="profileNameBtn" onclick="saveProfileName()">Save name</button>
+          </div>
+          <div class="profile-msg" id="profileNameMsg"></div>
+        </div>
+
+        <!-- Password -->
+        <div class="profile-section" id="profilePasswordSection">
+          <div class="profile-section-title"><i class="ti ti-lock" style="color:var(--teal);"></i> Password</div>
+          <div class="profile-section-desc">Change the password you use to sign in.</div>
+          <div class="profile-field">
+            <label>Current password</label>
+            <input type="password" id="profileCurrentPassword" autocomplete="current-password" />
+          </div>
+          <div class="profile-field">
+            <label>New password</label>
+            <input type="password" id="profileNewPassword" autocomplete="new-password" />
+          </div>
+          <div class="profile-field">
+            <label>Confirm new password</label>
+            <input type="password" id="profileConfirmPassword" autocomplete="new-password" oninput="checkProfilePasswordsMatch()" />
+            <div id="profilePasswordMatchHint" style="font-size:11px;min-height:14px;"></div>
+          </div>
+          <div class="profile-btn-row">
+            <button class="profile-btn" id="profilePasswordBtn" onclick="submitProfilePasswordChange()">Update password</button>
+          </div>
+          <div class="profile-msg" id="profilePasswordMsg"></div>
+        </div>
+
+        <!-- Two-step verification -->
+        <div class="profile-section">
+          <div class="profile-section-title"><i class="ti ti-shield-lock" style="color:var(--teal);"></i> Two-step verification</div>
+          <div class="tfa-row">
+            <div>
+              <div class="tfa-row-label">Require a second step at sign-in</div>
+              <div class="tfa-row-sub">Adds an extra check by email each time you sign in.</div>
+            </div>
+            <div class="big-toggle" id="tfaToggle" onclick="toggleTfaEnabled()">
+              <div class="big-toggle-thumb"></div>
+            </div>
+          </div>
+
+          <div class="tfa-methods" id="tfaMethods" style="display:none;">
+            <label class="tfa-method-option" id="tfaOptionOtp">
+              <input type="radio" name="tfaMethod" value="otp" onchange="selectTfaMethod('otp')" />
+              <div>
+                <div class="tfa-method-title">Emailed one-time code</div>
+                <div class="tfa-method-desc">We email a 6-digit code — enter it to finish signing in.</div>
+              </div>
+            </label>
+            <label class="tfa-method-option" id="tfaOptionLink">
+              <input type="radio" name="tfaMethod" value="link" onchange="selectTfaMethod('link')" />
+              <div>
+                <div class="tfa-method-title">Emailed approval link</div>
+                <div class="tfa-method-desc">We email a link that says "It's me" — click it in the same email inbox to approve the sign-in.</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="profile-btn-row">
+            <button class="profile-btn" id="tfaSaveBtn" onclick="saveTfaSettings()">Save settings</button>
+          </div>
+          <div class="profile-msg" id="tfaMsg"></div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -640,11 +812,17 @@ function closeHelp() { document.getElementById('helpModal').classList.remove('op
 
 // ── Auth screens ───────────────────────────────────────────────────────────
 function hideAllAuthScreens() {
-  document.getElementById('loginScreen').style.display    = 'none';
-  document.getElementById('registerScreen').style.display = 'none';
-  document.getElementById('forgotScreen').style.display   = 'none';
-  document.getElementById('otpScreen').style.display      = 'none';
-  document.getElementById('resetScreen').style.display    = 'none';
+  document.getElementById('loginScreen').style.display          = 'none';
+  document.getElementById('registerScreen').style.display       = 'none';
+  document.getElementById('forgotScreen').style.display         = 'none';
+  document.getElementById('otpScreen').style.display             = 'none';
+  document.getElementById('resetScreen').style.display           = 'none';
+  document.getElementById('loginOtpScreen').style.display        = 'none';
+  document.getElementById('loginApprovalScreen').style.display   = 'none';
+  if (typeof approvalPollTimer !== 'undefined' && approvalPollTimer) {
+    clearInterval(approvalPollTimer);
+    approvalPollTimer = null;
+  }
 }
 
 function showLogin() {
@@ -678,7 +856,6 @@ function showResetPassword() {
   document.getElementById('authThemeToggle').style.display = 'flex';
   document.getElementById('resetError').textContent        = '';
   document.getElementById('resetSuccess').style.display    = 'none';
-  document.getElementById('resetMatchHint').textContent    = '';
   setAuthLoading(false, 'reset');
 }
 
@@ -697,7 +874,7 @@ function showOtp(email) {
 const AUTH_SCREEN_META = {
   login:    { btnId: 'loginBtn',    idleLabel: 'Sign In',            loadingLabel: 'Signing in…' },
   register: { btnId: 'registerBtn', idleLabel: 'Create Account',     loadingLabel: 'Creating account…' },
-  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Get OTP',            loadingLabel: 'Sending OTP…' },
+  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Send Reset Link',    loadingLabel: 'Sending…' },
   otp:      { btnId: 'otpBtn',      idleLabel: 'Verify Code',        loadingLabel: 'Verifying…' },
   reset:    { btnId: 'resetBtn',    idleLabel: 'Update Password',    loadingLabel: 'Updating…' },
 };
@@ -724,17 +901,229 @@ function hideAuthScreens(userName, userEmail) {
   currentUserName  = userName  || 'User';
   currentUserEmail = userEmail || '';
 
-  // Profile avatar initials
-  const initials = currentUserName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('profileInitials').textContent = initials;
-  document.getElementById('profileWrap').style.display  = 'block';
-
-  // Dropdown info
-  document.getElementById('pdName').textContent  = currentUserName;
-  document.getElementById('pdEmail').textContent = currentUserEmail;
+  document.getElementById('profileWrap').style.display = 'block';
+  applyAvatarEverywhere(null, currentUserName);   // initials first; fetchProfile() below fills in the real photo
 
   loadHistory();
   loadNccnFiles();
+  fetchProfile();
+}
+
+// ── Shared avatar rendering ─────────────────────────────────────────────────
+// Keeps the topbar avatar, the dropdown avatar, and the profile-page avatar
+// all in sync, whether the user has a photo or just gets initials.
+function applyAvatarEverywhere(photoDataUrl, name) {
+  const initials = (name || 'User').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const targets = [
+    { el: document.getElementById('profileAvatar'),      initialsEl: document.getElementById('profileInitials') },
+    { el: document.getElementById('profileAvatarLarge'), initialsEl: document.getElementById('profileInitialsLarge') },
+    { el: document.getElementById('profilePhotoBig'),    initialsEl: document.getElementById('profilePhotoInitialsBig') },
+  ];
+  targets.forEach(({ el, initialsEl }) => {
+    if (!el) return;
+    if (photoDataUrl) {
+      el.style.backgroundImage = `url(${photoDataUrl})`;
+      if (initialsEl) initialsEl.style.display = 'none';
+    } else {
+      el.style.backgroundImage = 'none';
+      if (initialsEl) { initialsEl.style.display = 'inline'; initialsEl.textContent = initials; }
+    }
+  });
+}
+
+let currentProfilePhoto = null;
+let tfaEnabledState = false;
+let tfaMethodState  = 'otp';
+
+async function fetchProfile() {
+  if (!authToken) return;
+  try {
+    const res  = await fetch(`${API}/profile`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    if (!res.ok) return;
+    const data = await res.json();
+    currentUserName  = data.name;
+    currentUserEmail = data.email;
+    currentProfilePhoto = data.profile_pic || null;
+    tfaEnabledState = !!data.two_factor_enabled;
+    tfaMethodState  = data.two_factor_method || 'otp';
+    applyAvatarEverywhere(currentProfilePhoto, currentUserName);
+  } catch { /* silent */ }
+}
+
+// ── Profile page ─────────────────────────────────────────────────────────
+async function loadProfilePage() {
+  document.getElementById('profileHeroName').textContent  = currentUserName  || '–';
+  document.getElementById('profileHeroEmail').textContent = currentUserEmail || '–';
+  document.getElementById('profileNameInput').value = currentUserName || '';
+  document.getElementById('profileNameMsg').textContent = '';
+  document.getElementById('profilePasswordMsg').textContent = '';
+  document.getElementById('profileCurrentPassword').value = '';
+  document.getElementById('profileNewPassword').value = '';
+  document.getElementById('profileConfirmPassword').value = '';
+  document.getElementById('profilePasswordMatchHint').textContent = '';
+  applyAvatarEverywhere(currentProfilePhoto, currentUserName);
+
+  try {
+    const res  = await fetch(`${API}/profile`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const data = await res.json();
+    if (res.ok) {
+      currentUserName  = data.name;
+      currentUserEmail = data.email;
+      currentProfilePhoto = data.profile_pic || null;
+      tfaEnabledState = !!data.two_factor_enabled;
+      tfaMethodState  = data.two_factor_method || 'otp';
+      document.getElementById('profileHeroName').textContent  = currentUserName;
+      document.getElementById('profileHeroEmail').textContent = currentUserEmail;
+      document.getElementById('profileNameInput').value = currentUserName;
+      applyAvatarEverywhere(currentProfilePhoto, currentUserName);
+
+      // Google-sign-in accounts have no password to change.
+      document.getElementById('profilePasswordSection').style.display =
+        data.provider === 'local' ? 'block' : 'none';
+
+      renderTfaState();
+    }
+  } catch { /* silent */ }
+}
+
+async function saveProfileName() {
+  const name  = document.getElementById('profileNameInput').value.trim();
+  const msgEl = document.getElementById('profileNameMsg');
+  const btn   = document.getElementById('profileNameBtn');
+  msgEl.className = 'profile-msg'; msgEl.textContent = '';
+  if (!name) { msgEl.className = 'profile-msg err'; msgEl.textContent = 'Name cannot be empty.'; return; }
+
+  btn.disabled = true;
+  try {
+    const res  = await fetch(`${API}/profile/name`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ name })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || 'Could not update name.');
+    currentUserName = name;
+    document.getElementById('profileHeroName').textContent = name;
+    applyAvatarEverywhere(currentProfilePhoto, name);
+    msgEl.className = 'profile-msg ok'; msgEl.textContent = 'Name updated.';
+  } catch (err) {
+    msgEl.className = 'profile-msg err'; msgEl.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function uploadProfilePhoto(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { alert('Please choose an image file.'); event.target.value = ''; return; }
+  if (file.size > 1.5 * 1024 * 1024) { alert('Please choose an image smaller than 1.5MB.'); event.target.value = ''; return; }
+
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const dataUrl = reader.result;
+    applyAvatarEverywhere(dataUrl, currentUserName); // optimistic preview
+    try {
+      const res = await fetch(`${API}/profile/photo`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+        body: JSON.stringify({ photo: dataUrl })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || 'Could not upload photo.');
+      currentProfilePhoto = dataUrl;
+    } catch (err) {
+      applyAvatarEverywhere(currentProfilePhoto, currentUserName); // revert on failure
+      alert(err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function checkProfilePasswordsMatch() {
+  const pw = document.getElementById('profileNewPassword').value;
+  const cf = document.getElementById('profileConfirmPassword').value;
+  const hint = document.getElementById('profilePasswordMatchHint');
+  if (!cf) { hint.textContent = ''; return; }
+  if (pw === cf) { hint.style.color = 'var(--success)'; hint.textContent = '✓ Passwords match'; }
+  else { hint.style.color = 'var(--danger)'; hint.textContent = '✗ Passwords do not match'; }
+}
+
+async function submitProfilePasswordChange() {
+  const current = document.getElementById('profileCurrentPassword').value;
+  const next    = document.getElementById('profileNewPassword').value;
+  const confirm = document.getElementById('profileConfirmPassword').value;
+  const msgEl   = document.getElementById('profilePasswordMsg');
+  const btn     = document.getElementById('profilePasswordBtn');
+  msgEl.className = 'profile-msg'; msgEl.textContent = '';
+
+  if (!current || !next || !confirm) { msgEl.className = 'profile-msg err'; msgEl.textContent = 'Please fill in all password fields.'; return; }
+  if (next.length < 6) { msgEl.className = 'profile-msg err'; msgEl.textContent = 'New password must be at least 6 characters.'; return; }
+  if (next !== confirm) { msgEl.className = 'profile-msg err'; msgEl.textContent = 'New passwords do not match.'; return; }
+
+  btn.disabled = true;
+  try {
+    const res  = await fetch(`${API}/profile/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ current_password: current, new_password: next })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || 'Could not update password.');
+    msgEl.className = 'profile-msg ok'; msgEl.textContent = 'Password updated.';
+    document.getElementById('profileCurrentPassword').value = '';
+    document.getElementById('profileNewPassword').value = '';
+    document.getElementById('profileConfirmPassword').value = '';
+    document.getElementById('profilePasswordMatchHint').textContent = '';
+  } catch (err) {
+    msgEl.className = 'profile-msg err'; msgEl.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Two-step verification (2FA) settings ───────────────────────────────────
+function renderTfaState() {
+  document.getElementById('tfaToggle').classList.toggle('on', tfaEnabledState);
+  document.getElementById('tfaMethods').style.display = tfaEnabledState ? 'flex' : 'none';
+  document.getElementById('tfaOptionOtp').classList.toggle('selected', tfaMethodState === 'otp');
+  document.getElementById('tfaOptionLink').classList.toggle('selected', tfaMethodState === 'link');
+  document.querySelector(`input[name="tfaMethod"][value="${tfaMethodState}"]`).checked = true;
+}
+
+function toggleTfaEnabled() {
+  tfaEnabledState = !tfaEnabledState;
+  renderTfaState();
+}
+
+function selectTfaMethod(method) {
+  tfaMethodState = method;
+  renderTfaState();
+}
+
+async function saveTfaSettings() {
+  const msgEl = document.getElementById('tfaMsg');
+  const btn   = document.getElementById('tfaSaveBtn');
+  msgEl.className = 'profile-msg'; msgEl.textContent = '';
+  btn.disabled = true;
+  try {
+    const res  = await fetch(`${API}/profile/2fa`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ enabled: tfaEnabledState, method: tfaMethodState })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || 'Could not update settings.');
+    msgEl.className = 'profile-msg ok';
+    msgEl.textContent = tfaEnabledState
+      ? `Two-step verification is on (${tfaMethodState === 'otp' ? 'emailed code' : 'emailed approval link'}).`
+      : 'Two-step verification is off.';
+  } catch (err) {
+    msgEl.className = 'profile-msg err'; msgEl.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ── Login ─────────────────────────────────────────────────────────────────
@@ -753,12 +1142,99 @@ async function submitLogin() {
     });
     const data = await res.json();
     if (!res.ok) { errEl.textContent = data.detail || 'Login failed.'; setAuthLoading(false, 'login'); return; }
+
+    if (data.requires_2fa) {
+      setAuthLoading(false, 'login');
+      if (data.method === 'otp') {
+        pendingLoginTempToken = data.temp_token;
+        showLoginOtp(email);
+      } else {
+        showLoginApprovalWait(email, data.login_id);
+      }
+      return;
+    }
+
     authToken = data.access_token;
     hideAuthScreens(data.user_name, data.user_email);
   } catch {
     errEl.textContent = 'Cannot reach server. Is FastAPI running?';
     setAuthLoading(false, 'login');
   }
+}
+
+// ── Sign-in 2FA: emailed one-time code ──────────────────────────────────────
+let pendingLoginTempToken = null;
+
+function showLoginOtp(email) {
+  hideAllAuthScreens();
+  document.getElementById('loginOtpScreen').style.display    = 'flex';
+  document.getElementById('authThemeToggle').style.display   = 'flex';
+  document.getElementById('loginOtpError').textContent       = '';
+  document.getElementById('loginOtpCode').value               = '';
+  document.getElementById('loginOtpSubText').textContent      = `Enter the 6-digit code sent to ${email}`;
+}
+
+async function submitLoginOtp() {
+  const otp   = document.getElementById('loginOtpCode').value.trim();
+  const errEl = document.getElementById('loginOtpError');
+  const btn   = document.getElementById('loginOtpBtn');
+  errEl.textContent = '';
+  if (!otp || otp.length !== 6) { errEl.textContent = 'Enter the 6-digit code.'; return; }
+  if (!pendingLoginTempToken) { errEl.textContent = 'Session expired — please sign in again.'; return; }
+
+  btn.disabled = true; btn.innerHTML = '<div class="spin"></div>Verifying…';
+  try {
+    const res  = await fetch(`${API}/login/verify-otp`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ temp_token: pendingLoginTempToken, otp })
+    });
+    const data = await res.json().catch(() => ({}));
+    btn.disabled = false; btn.innerHTML = 'Verify & sign in';
+    if (!res.ok) { errEl.textContent = data.detail || 'Invalid or expired code.'; return; }
+    authToken = data.access_token;
+    pendingLoginTempToken = null;
+    hideAuthScreens(data.user_name, data.user_email);
+  } catch {
+    btn.disabled = false; btn.innerHTML = 'Verify & sign in';
+    errEl.textContent = 'Cannot reach server. Is FastAPI running?';
+  }
+}
+
+// ── Sign-in 2FA: emailed "it's me" approval link (polling) ─────────────────
+let approvalPollTimer = null;
+
+function showLoginApprovalWait(email, loginId) {
+  hideAllAuthScreens();
+  document.getElementById('loginApprovalScreen').style.display  = 'flex';
+  document.getElementById('authThemeToggle').style.display      = 'flex';
+  document.getElementById('loginApprovalSubText').textContent    = `We emailed an approval link to ${email}. Click it to finish signing in — this page updates automatically.`;
+  document.getElementById('loginApprovalError').textContent      = '';
+
+  if (approvalPollTimer) clearInterval(approvalPollTimer);
+  approvalPollTimer = setInterval(() => pollLoginApproval(loginId), 3000);
+  pollLoginApproval(loginId);
+}
+
+async function pollLoginApproval(loginId) {
+  try {
+    const res  = await fetch(`${API}/login/status/${loginId}`);
+    if (res.status === 404) {
+      clearInterval(approvalPollTimer);
+      document.getElementById('loginApprovalError').textContent = 'This sign-in request expired. Please try again.';
+      return;
+    }
+    const data = await res.json();
+    if (data.approved) {
+      clearInterval(approvalPollTimer);
+      authToken = data.access_token;
+      hideAuthScreens(data.user_name, data.user_email);
+    }
+  } catch { /* keep polling silently */ }
+}
+
+function cancelLoginApprovalWait() {
+  if (approvalPollTimer) clearInterval(approvalPollTimer);
+  showLogin();
 }
 
 // ── Register ──────────────────────────────────────────────────────────────
@@ -852,22 +1328,6 @@ async function resendOtp() {
 
 let pendingResetToken = null;
 
-// Live "do these match?" hint as the user types in the confirm field.
-function checkPasswordsMatch() {
-  const password = document.getElementById('resetPassword').value;
-  const confirm  = document.getElementById('resetPasswordConfirm').value;
-  const hint     = document.getElementById('resetMatchHint');
-  if (!hint) return;
-  if (!confirm) { hint.textContent = ''; return; }
-  if (password === confirm) {
-    hint.textContent = '✓ Passwords match';
-    hint.style.color = 'var(--success)';
-  } else {
-    hint.textContent = '✗ Passwords do not match';
-    hint.style.color = 'var(--danger)';
-  }
-}
-
 async function submitResetPassword() {
   const password = document.getElementById('resetPassword').value;
   const confirm  = document.getElementById('resetPasswordConfirm').value;
@@ -875,7 +1335,7 @@ async function submitResetPassword() {
   const okEl     = document.getElementById('resetSuccess');
   errEl.textContent = '';
   okEl.style.display = 'none';
-  if (!password || !confirm) { errEl.textContent = 'Please fill in both password fields.'; return; }
+  if (!password) { errEl.textContent = 'Please enter a new password.'; return; }
   if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
   if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
   if (!pendingResetToken) { errEl.textContent = 'This reset link is invalid. Please request a new one.'; return; }
@@ -1029,10 +1489,12 @@ const sessionHistory = [];
 function showView(view) {
   document.getElementById('view-chat').style.display    = view === 'chat'    ? 'flex' : 'none';
   document.getElementById('view-history').style.display = view === 'history' ? 'flex' : 'none';
+  document.getElementById('view-profile').style.display = view === 'profile' ? 'flex' : 'none';
   document.getElementById('history-sidebar').style.display = view === 'history' ? 'block' : 'none';
   document.getElementById('nav-chat').classList.toggle('active',    view === 'chat');
   document.getElementById('nav-history').classList.toggle('active', view === 'history');
   if (view === 'history') renderHistoryView();
+  if (view === 'profile') loadProfilePage();
 }
 
 function renderHistoryView() {

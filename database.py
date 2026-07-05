@@ -84,6 +84,24 @@ def create_tables() -> None:
         conn.execute(text("""
             ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp_attempts INTEGER NOT NULL DEFAULT 0
         """))
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_pic TEXT
+        """))
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE
+        """))
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS two_factor_method TEXT NOT NULL DEFAULT 'otp'
+        """))
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS login_otp_hash TEXT
+        """))
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS login_otp_expires TEXT
+        """))
+        conn.execute(text("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS login_otp_attempts INTEGER NOT NULL DEFAULT 0
+        """))
 
     print("[DB] Tables ready on Supabase Postgres")
 
@@ -152,6 +170,73 @@ def update_user_password(user_id: int, hashed_password: str) -> bool:
             UPDATE users SET hashed_password = :hashed_password WHERE id = :id
         """), {"hashed_password": hashed_password, "id": user_id})
     return result.rowcount > 0
+
+
+def update_user_name(user_id: int, name: str) -> bool:
+    """Update a user's display name (used by the Profile page)."""
+    with engine.begin() as conn:
+        result = conn.execute(text("""
+            UPDATE users SET name = :name WHERE id = :id
+        """), {"name": name, "id": user_id})
+    return result.rowcount > 0
+
+
+def update_user_photo(user_id: int, photo_data_url: str | None) -> bool:
+    """
+    Update a user's profile picture. `photo_data_url` is expected to be a
+    base64 data URL (e.g. 'data:image/png;base64,...'), or None to clear it.
+    """
+    with engine.begin() as conn:
+        result = conn.execute(text("""
+            UPDATE users SET profile_pic = :photo WHERE id = :id
+        """), {"photo": photo_data_url, "id": user_id})
+    return result.rowcount > 0
+
+
+def update_two_factor_settings(user_id: int, enabled: bool, method: str) -> bool:
+    """Enable/disable two-step verification and set the preferred method
+    ('otp' = emailed one-time code, 'link' = emailed approval link)."""
+    with engine.begin() as conn:
+        result = conn.execute(text("""
+            UPDATE users SET two_factor_enabled = :enabled, two_factor_method = :method
+            WHERE id = :id
+        """), {"enabled": bool(enabled), "method": method, "id": user_id})
+    return result.rowcount > 0
+
+
+# ── Login OTP helpers (separate from the forgot-password OTP) ───────────────
+
+def set_login_otp(user_id: int, otp_hash: str, expires_at: str) -> None:
+    with engine.begin() as conn:
+        conn.execute(text("""
+            UPDATE users
+            SET login_otp_hash = :otp_hash, login_otp_expires = :expires_at, login_otp_attempts = 0
+            WHERE id = :id
+        """), {"otp_hash": otp_hash, "expires_at": expires_at, "id": user_id})
+
+
+def get_login_otp(user_id: int) -> dict | None:
+    with engine.connect() as conn:
+        row = conn.execute(text("""
+            SELECT login_otp_hash, login_otp_expires, login_otp_attempts
+            FROM users WHERE id = :id
+        """), {"id": user_id}).fetchone()
+    return _row_to_dict(row)
+
+
+def increment_login_otp_attempts(user_id: int) -> None:
+    with engine.begin() as conn:
+        conn.execute(text("""
+            UPDATE users SET login_otp_attempts = login_otp_attempts + 1 WHERE id = :id
+        """), {"id": user_id})
+
+
+def clear_login_otp(user_id: int) -> None:
+    with engine.begin() as conn:
+        conn.execute(text("""
+            UPDATE users SET login_otp_hash = NULL, login_otp_expires = NULL, login_otp_attempts = 0
+            WHERE id = :id
+        """), {"id": user_id})
 
 
 def set_reset_otp(user_id: int, otp_hash: str, expires_at: str) -> None:

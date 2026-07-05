@@ -29,6 +29,25 @@ class Token(BaseModel):
     user_name: str
     user_email: str
 
+# ── Profile & 2FA models ─────────────────────────────────────────
+class UpdateNameRequest(BaseModel):
+    name: str
+
+class UpdatePhotoRequest(BaseModel):
+    photo: str | None = None   # base64 data URL, or None to remove
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+class TwoFactorSettingsRequest(BaseModel):
+    enabled: bool
+    method: str  # "otp" or "link"
+
+class VerifyLoginOtpRequest(BaseModel):
+    temp_token: str
+    otp: str
+
 # ── Chat models ──────────────────────────────────────────────────
 class ChatRecord(BaseModel):
     question: str

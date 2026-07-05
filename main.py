@@ -1,5 +1,6 @@
 import json
 import os
+import secrets as pysecrets
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
@@ -16,16 +17,22 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from auth import (create_reset_token, create_token, generate_otp, get_current_user,
                   hash_otp, hash_password, oauth, verify_password, verify_reset_token,
-                  OTP_EXPIRE_MINUTES, OTP_MAX_ATTEMPTS)
+                  OTP_EXPIRE_MINUTES, OTP_MAX_ATTEMPTS,
+                  create_login_2fa_token, verify_login_2fa_token,
+                  create_login_approval_token, verify_login_approval_token)
 from bm25_search import build_bm25_index
 from chunker import chunk_pages
 from database import (create_user, get_user_by_email, get_reset_otp,
                       get_user_by_google_id, get_user_by_id, save_chat, get_user_history,
                       set_reset_otp, increment_otp_attempts, clear_reset_otp,
-                      update_user_password)
+                      update_user_password, update_user_name, update_user_photo,
+                      update_two_factor_settings, set_login_otp, get_login_otp,
+                      increment_login_otp_attempts, clear_login_otp)
 from embedder import embed_texts
 from models import (ForgotPasswordRequest, LoginRequest, RegisterRequest,
-                    ResetPasswordRequest, Token, VerifyOtpRequest)
+                    ResetPasswordRequest, Token, VerifyOtpRequest,
+                    UpdateNameRequest, UpdatePhotoRequest, ChangePasswordRequest,
+                    TwoFactorSettingsRequest, VerifyLoginOtpRequest)
 from pdf_extractor import extract_pdf_pages
 from rag_agent import execute_rag_query
 
@@ -68,6 +75,13 @@ app.add_middleware(
 
 class QuestionRequest(BaseModel):
     question: str
+
+
+# In-memory store for pending "approve this sign-in" logins (link-based 2FA).
+# Keyed by a random login_id the browser tab polls on. Fine for a single
+# free-tier instance; entries are short-lived (created + polled within
+# LOGIN_APPROVAL_TOKEN_EXPIRE_MINUTES) and are popped once consumed.
+pending_logins: dict[str, dict[str, Any]] = {}
 
 
 # ── Collection helpers ────────────────────────────────────────────────────────
@@ -179,13 +193,178 @@ def register(req: RegisterRequest):
     return Token(access_token=token, user_name=user["name"], user_email=user["email"])
 
 
-@app.post("/login", response_model=Token)
-def login(req: LoginRequest):
+@app.post("/login")
+def login(req: LoginRequest) -> dict[str, Any]:
     user = get_user_by_email(req.email)
     if not user or not verify_password(req.password, user["hashed_password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    token = create_token(user["id"])
+
+    if not user.get("two_factor_enabled"):
+        token = create_token(user["id"])
+        return {
+            "requires_2fa": False,
+            "access_token": token,
+            "token_type": "bearer",
+            "user_name": user["name"],
+            "user_email": user["email"],
+        }
+
+    method = user.get("two_factor_method") or "otp"
+
+    if method == "link":
+        login_id = pysecrets.token_urlsafe(16)
+        pending_logins[login_id] = {
+            "user_id": user["id"],
+            "approved": False,
+            "created": datetime.now(timezone.utc),
+        }
+        approval_token = create_login_approval_token(user["id"], login_id)
+        approve_url = f"https://onco-ai-api.onrender.com/login/approve?token={approval_token}"
+        send_login_approval_email(user["email"], approve_url)
+        return {"requires_2fa": True, "method": "link", "login_id": login_id}
+
+    # Default / "otp" method
+    otp = generate_otp()
+    otp_hash = hash_otp(otp)
+    expires_at = (datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRE_MINUTES)).isoformat()
+    set_login_otp(user["id"], otp_hash, expires_at)
+    send_login_otp_email(user["email"], otp)
+    return {
+        "requires_2fa": True,
+        "method": "otp",
+        "temp_token": create_login_2fa_token(user["id"]),
+    }
+
+
+def send_login_otp_email(to_email: str, otp: str) -> None:
+    if not RESEND_API_KEY:
+        print(f"[Login 2FA] RESEND_API_KEY not set. Login OTP for {to_email}: {otp}")
+        return
+    try:
+        requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}"},
+            json={
+                "from": RESEND_FROM_EMAIL,
+                "to": [to_email],
+                "subject": "Your ONCO AI sign-in code",
+                "html": (
+                    "<p>Someone is signing in to your ONCO AI account. "
+                    "Enter this code to continue:</p>"
+                    f"<p style=\"font-size:28px;font-weight:700;letter-spacing:4px;\">{otp}</p>"
+                    "<p>This code expires in 10 minutes. If this wasn't you, "
+                    "you can safely ignore this email — your account is still secure.</p>"
+                ),
+            },
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        print(f"[Login 2FA] Failed to send login OTP email: {exc}")
+
+
+def send_login_approval_email(to_email: str, approve_url: str) -> None:
+    if not RESEND_API_KEY:
+        print(f"[Login 2FA] RESEND_API_KEY not set. Approval link for {to_email}: {approve_url}")
+        return
+    try:
+        requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}"},
+            json={
+                "from": RESEND_FROM_EMAIL,
+                "to": [to_email],
+                "subject": "Approve your ONCO AI sign-in",
+                "html": (
+                    "<p>Someone is signing in to your ONCO AI account. "
+                    "If this was you, click below to approve it:</p>"
+                    f"<p><a href=\"{approve_url}\" "
+                    "style=\"display:inline-block;padding:12px 24px;background:#7c3aed;"
+                    "color:#fff;text-decoration:none;border-radius:8px;font-weight:600;\">"
+                    "Approve this sign-in</a></p>"
+                    "<p>This link expires in 15 minutes. If this wasn't you, ignore this "
+                    "email and consider changing your password.</p>"
+                ),
+            },
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        print(f"[Login 2FA] Failed to send approval email: {exc}")
+
+
+@app.post("/login/verify-otp", response_model=Token)
+def login_verify_otp(req: VerifyLoginOtpRequest):
+    generic_error = "Invalid or expired code."
+    try:
+        user_id = verify_login_2fa_token(req.temp_token)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    record = get_login_otp(user_id)
+    if not record or not record.get("login_otp_hash"):
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    if record["login_otp_attempts"] >= OTP_MAX_ATTEMPTS:
+        raise HTTPException(status_code=429, detail="Too many attempts. Please sign in again.")
+
+    expires_at = datetime.fromisoformat(record["login_otp_expires"])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    if hash_otp(req.otp.strip()) != record["login_otp_hash"]:
+        increment_login_otp_attempts(user_id)
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    clear_login_otp(user_id)
+    user = get_user_by_id(user_id)
+    token = create_token(user_id)
     return Token(access_token=token, user_name=user["name"], user_email=user["email"])
+
+
+@app.get("/login/approve")
+def login_approve(token: str) -> HTMLResponse:
+    try:
+        user_id, login_id = verify_login_approval_token(token)
+    except ValueError as exc:
+        return HTMLResponse(f"<html><body><p>{exc}</p></body></html>", status_code=400)
+
+    entry = pending_logins.get(login_id)
+    if not entry or entry["user_id"] != user_id:
+        return HTMLResponse(
+            "<html><body><p>This sign-in request has expired or was already used. "
+            "You can close this tab.</p></body></html>",
+            status_code=400,
+        )
+
+    entry["approved"] = True
+    return HTMLResponse(
+        "<html><body style=\"font-family:sans-serif;text-align:center;padding:60px 20px;\">"
+        "<h2>Sign-in approved ✓</h2><p>You can close this tab and return to ONCO AI.</p>"
+        "</body></html>"
+    )
+
+
+@app.get("/login/status/{login_id}")
+def login_status(login_id: str) -> dict[str, Any]:
+    entry = pending_logins.get(login_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="This sign-in request has expired.")
+
+    if not entry["approved"]:
+        return {"approved": False}
+
+    user = get_user_by_id(entry["user_id"])
+    pending_logins.pop(login_id, None)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    token = create_token(user["id"])
+    return {
+        "approved": True,
+        "access_token": token,
+        "token_type": "bearer",
+        "user_name": user["name"],
+        "user_email": user["email"],
+    }
 
 
 def send_otp_email(to_email: str, otp: str) -> None:
@@ -344,6 +523,68 @@ async def google_callback(request: Request):
 def get_history(current_user: dict = Depends(get_current_user)):
     records = get_user_history(current_user["id"])
     return {"history": records, "user": current_user["name"]}
+
+
+# ── Profile routes ────────────────────────────────────────────────────────────
+
+MAX_PHOTO_BASE64_CHARS = 2_000_000  # roughly ~1.5MB image, generous for a demo
+
+@app.get("/profile")
+def get_profile(current_user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    return {
+        "name": current_user["name"],
+        "email": current_user["email"],
+        "provider": current_user["provider"],
+        "profile_pic": current_user.get("profile_pic"),
+        "two_factor_enabled": bool(current_user.get("two_factor_enabled")),
+        "two_factor_method": current_user.get("two_factor_method") or "otp",
+    }
+
+
+@app.put("/profile/name")
+def put_profile_name(req: UpdateNameRequest,
+                     current_user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    name = req.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Name cannot be empty.")
+    update_user_name(current_user["id"], name)
+    return {"message": "Name updated.", "name": name}
+
+
+@app.put("/profile/photo")
+def put_profile_photo(req: UpdatePhotoRequest,
+                      current_user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    if req.photo and len(req.photo) > MAX_PHOTO_BASE64_CHARS:
+        raise HTTPException(status_code=413, detail="Image is too large. Please use a smaller photo.")
+    update_user_photo(current_user["id"], req.photo)
+    return {"message": "Profile photo updated." if req.photo else "Profile photo removed."}
+
+
+@app.post("/profile/change-password")
+def post_change_password(req: ChangePasswordRequest,
+                         current_user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    if current_user.get("provider") != "local":
+        raise HTTPException(
+            status_code=400,
+            detail="This account signs in with Google — there's no password to change.",
+        )
+    if not verify_password(req.current_password, current_user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Current password is incorrect.")
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters.")
+    if verify_password(req.new_password, current_user["hashed_password"]):
+        raise HTTPException(status_code=400, detail="New password must be different from your current password.")
+    update_user_password(current_user["id"], hash_password(req.new_password))
+    return {"message": "Password updated successfully."}
+
+
+@app.put("/profile/2fa")
+def put_two_factor_settings(req: TwoFactorSettingsRequest,
+                            current_user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    if req.method not in ("otp", "link"):
+        raise HTTPException(status_code=400, detail="Method must be 'otp' or 'link'.")
+    update_two_factor_settings(current_user["id"], req.enabled, req.method)
+    return {"message": "Two-step verification settings updated.", "enabled": req.enabled, "method": req.method}
 
 
 # ── PDF routes ────────────────────────────────────────────────────────────────
