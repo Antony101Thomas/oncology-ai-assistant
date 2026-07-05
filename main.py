@@ -491,27 +491,85 @@ async def google_callback(request: Request):
                 google_id=info["sub"]
             )
 
-    token = create_token(user["id"])
+    # ── Two-step verification also applies to Google sign-in ──────────────
+    # Build a JSON payload describing what the frontend should do next:
+    # either a normal token (2FA off), or a "please verify" instruction
+    # (2FA on) using whichever method the user picked in their profile.
+    if user.get("two_factor_enabled"):
+        method = user.get("two_factor_method") or "otp"
+
+        if method == "link":
+            login_id = pysecrets.token_urlsafe(16)
+            pending_logins[login_id] = {
+                "user_id": user["id"],
+                "approved": False,
+                "created": datetime.now(timezone.utc),
+            }
+            approval_token = create_login_approval_token(user["id"], login_id)
+            approve_url = f"https://onco-ai-api.onrender.com/login/approve?token={approval_token}"
+            send_login_approval_email(user["email"], approve_url)
+            payload = {
+                "type": "onco-google-auth",
+                "requires_2fa": True,
+                "method": "link",
+                "login_id": login_id,
+                "email": user["email"],
+            }
+        else:
+            otp = generate_otp()
+            otp_hash = hash_otp(otp)
+            expires_at = (datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRE_MINUTES)).isoformat()
+            set_login_otp(user["id"], otp_hash, expires_at)
+            send_login_otp_email(user["email"], otp)
+            payload = {
+                "type": "onco-google-auth",
+                "requires_2fa": True,
+                "method": "otp",
+                "temp_token": create_login_2fa_token(user["id"]),
+                "email": user["email"],
+            }
+    else:
+        token = create_token(user["id"])
+        payload = {
+            "type": "onco-google-auth",
+            "requires_2fa": False,
+            "token": token,
+            "user_name": user["name"],
+            "user_email": user["email"],
+        }
+
+    payload_json = json.dumps(payload)
+
+    # Build the no-popup fallback redirect URL's query string from the same payload.
+    fallback_params = {"requires_2fa": "1" if payload["requires_2fa"] else "0"}
+    if payload["requires_2fa"]:
+        fallback_params["method"] = payload["method"]
+        fallback_params["email"] = payload["email"]
+        if payload["method"] == "otp":
+            fallback_params["temp_token"] = payload["temp_token"]
+        else:
+            fallback_params["login_id"] = payload["login_id"]
+    else:
+        fallback_params["token"] = payload["token"]
+    fallback_query = "&".join(f"{k}={v}" for k, v in fallback_params.items())
 
     # This endpoint is normally opened in a small popup window by the
     # frontend (see googleLogin() in oncology_ui.html), so the user's main
     # tab never navigates to Google and nothing shows up in its back-history.
-    # We hand the token back to that opener window via postMessage and close
-    # the popup. If there's no opener (e.g. popups were blocked and the
-    # frontend fell back to a full-page redirect), we fall back to the old
-    # redirect-with-token-in-URL behaviour instead.
+    # We hand the payload back to that opener window via postMessage and
+    # close the popup. If there's no opener (e.g. popups were blocked and
+    # the frontend fell back to a full-page redirect), we fall back to a
+    # redirect with the same information carried in the URL instead.
     html = f"""<!DOCTYPE html>
 <html>
 <body>
 <script>
+  const payload = {payload_json};
   if (window.opener) {{
-    window.opener.postMessage(
-      {{ type: "onco-google-auth", token: "{token}" }},
-      "{FRONTEND_ORIGIN}"
-    );
+    window.opener.postMessage(payload, "{FRONTEND_ORIGIN}");
     window.close();
   }} else {{
-    window.location.replace("{FRONTEND_URL}?token={token}");
+    window.location.replace("{FRONTEND_URL}?{fallback_query}");
   }}
 </script>
 </body>
