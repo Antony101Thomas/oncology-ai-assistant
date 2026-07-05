@@ -216,16 +216,22 @@ def send_otp_email(to_email: str, otp: str) -> None:
 @app.post("/forgot-password")
 def forgot_password(req: ForgotPasswordRequest) -> dict[str, Any]:
     user = get_user_by_email(req.email)
-    # Only local (email/password) accounts have a password to reset. We
-    # still return the same generic message either way so this endpoint
-    # can't be used to check which emails are registered.
-    if user and user.get("provider") == "local":
-        otp        = generate_otp()
-        otp_hash   = hash_otp(otp)
-        expires_at = (datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRE_MINUTES)).isoformat()
-        set_reset_otp(user["id"], otp_hash, expires_at)
-        send_otp_email(user["email"], otp)
-    return {"message": "If an account exists for that email, a reset code has been sent."}
+
+    if not user:
+        raise HTTPException(status_code=404, detail="No account found with that email.")
+
+    if user.get("provider") != "local":
+        raise HTTPException(
+            status_code=400,
+            detail="This account signs in with Google — there's no password to reset.",
+        )
+
+    otp        = generate_otp()
+    otp_hash   = hash_otp(otp)
+    expires_at = (datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRE_MINUTES)).isoformat()
+    set_reset_otp(user["id"], otp_hash, expires_at)
+    send_otp_email(user["email"], otp)
+    return {"message": "A reset code has been sent to your email."}
 
 
 @app.post("/verify-otp")
@@ -264,6 +270,14 @@ def reset_password(req: ResetPasswordRequest) -> dict[str, Any]:
 
     if len(req.new_password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    # Don't allow "resetting" to the same password the account already has.
+    if user.get("hashed_password") and verify_password(req.new_password, user["hashed_password"]):
+        raise HTTPException(status_code=400, detail="New password must be different from your old password.")
 
     hashed  = hash_password(req.new_password)
     updated = update_user_password(user_id, hashed)
