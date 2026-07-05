@@ -352,7 +352,7 @@
       <input type="email" id="forgotEmail" name="onco-forgot-id" placeholder="you@example.com" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')"
              onkeydown="if(event.key==='Enter') submitForgotPassword()" />
     </div>
-    <button class="auth-btn" id="forgotBtn" onclick="submitForgotPassword()">Send Reset Link</button>
+    <button class="auth-btn" id="forgotBtn" onclick="submitForgotPassword()">GET OTP</button>
     <div class="auth-error" id="forgotError"></div>
     <div class="auth-success" id="forgotSuccess" style="display:none;"></div>
     <div class="auth-switch" style="margin-top:18px;">Remembered it? <span onclick="showLogin()">Sign In</span></div>
@@ -690,7 +690,7 @@ function showOtp(email) {
 const AUTH_SCREEN_META = {
   login:    { btnId: 'loginBtn',    idleLabel: 'Sign In',            loadingLabel: 'Signing in…' },
   register: { btnId: 'registerBtn', idleLabel: 'Create Account',     loadingLabel: 'Creating account…' },
-  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Send Reset Link',    loadingLabel: 'Sending…' },
+  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Get OTP',    loadingLabel: 'Sending OTP…' },
   otp:      { btnId: 'otpBtn',      idleLabel: 'Verify Code',        loadingLabel: 'Verifying…' },
   reset:    { btnId: 'resetBtn',    idleLabel: 'Update Password',    loadingLabel: 'Updating…' },
 };
