@@ -226,9 +226,9 @@
     .animated-word-wrap {
       position: relative;
       display: inline-block;
-      min-width: 460px;
+      width: clamp(320px, 46vw, 820px);
       height: 1.15em;
-      overflow: hidden;
+      overflow: visible;
     }
     .aword {
       position: absolute; top: 0; left: 0;
@@ -470,7 +470,7 @@
       .section, .creator-section, .cta-section { padding-left: 20px; padding-right: 20px; }
       .creator-card { padding: 28px; }
       .cta-card { padding: 36px 24px; }
-      .animated-word-wrap { min-width: 220px; }
+      .animated-word-wrap { width: 100%; }
     }
   </style>
 </head>
