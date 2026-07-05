@@ -20,7 +20,7 @@ from auth import (create_reset_token, create_token, generate_otp, get_current_us
 from bm25_search import build_bm25_index
 from chunker import chunk_pages
 from database import (create_user, get_user_by_email, get_reset_otp,
-                      get_user_by_google_id, save_chat, get_user_history,
+                      get_user_by_google_id, get_user_by_id, save_chat, get_user_history,
                       set_reset_otp, increment_otp_attempts, clear_reset_otp,
                       update_user_password)
 from embedder import embed_texts
