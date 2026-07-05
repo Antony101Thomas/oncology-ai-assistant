@@ -397,7 +397,9 @@
     <div class="auth-field">
       <label>Confirm New Password</label>
       <input type="password" id="resetPasswordConfirm" name="onco-reset-confirm" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
+             oninput="checkPasswordsMatch()"
              onkeydown="if(event.key==='Enter') submitResetPassword()" />
+      <div id="resetMatchHint" style="font-size:11px;margin-top:4px;min-height:14px;"></div>
     </div>
     <button class="auth-btn" id="resetBtn" onclick="submitResetPassword()">Update Password</button>
     <div class="auth-error" id="resetError"></div>
@@ -676,6 +678,7 @@ function showResetPassword() {
   document.getElementById('authThemeToggle').style.display = 'flex';
   document.getElementById('resetError').textContent        = '';
   document.getElementById('resetSuccess').style.display    = 'none';
+  document.getElementById('resetMatchHint').textContent    = '';
   setAuthLoading(false, 'reset');
 }
 
@@ -694,7 +697,7 @@ function showOtp(email) {
 const AUTH_SCREEN_META = {
   login:    { btnId: 'loginBtn',    idleLabel: 'Sign In',            loadingLabel: 'Signing in…' },
   register: { btnId: 'registerBtn', idleLabel: 'Create Account',     loadingLabel: 'Creating account…' },
-  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Send Reset Link',    loadingLabel: 'Sending…' },
+  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Get OTP',            loadingLabel: 'Sending OTP…' },
   otp:      { btnId: 'otpBtn',      idleLabel: 'Verify Code',        loadingLabel: 'Verifying…' },
   reset:    { btnId: 'resetBtn',    idleLabel: 'Update Password',    loadingLabel: 'Updating…' },
 };
@@ -849,6 +852,22 @@ async function resendOtp() {
 
 let pendingResetToken = null;
 
+// Live "do these match?" hint as the user types in the confirm field.
+function checkPasswordsMatch() {
+  const password = document.getElementById('resetPassword').value;
+  const confirm  = document.getElementById('resetPasswordConfirm').value;
+  const hint     = document.getElementById('resetMatchHint');
+  if (!hint) return;
+  if (!confirm) { hint.textContent = ''; return; }
+  if (password === confirm) {
+    hint.textContent = '✓ Passwords match';
+    hint.style.color = 'var(--success)';
+  } else {
+    hint.textContent = '✗ Passwords do not match';
+    hint.style.color = 'var(--danger)';
+  }
+}
+
 async function submitResetPassword() {
   const password = document.getElementById('resetPassword').value;
   const confirm  = document.getElementById('resetPasswordConfirm').value;
@@ -856,7 +875,7 @@ async function submitResetPassword() {
   const okEl     = document.getElementById('resetSuccess');
   errEl.textContent = '';
   okEl.style.display = 'none';
-  if (!password) { errEl.textContent = 'Please enter a new password.'; return; }
+  if (!password || !confirm) { errEl.textContent = 'Please fill in both password fields.'; return; }
   if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
   if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
   if (!pendingResetToken) { errEl.textContent = 'This reset link is invalid. Please request a new one.'; return; }
