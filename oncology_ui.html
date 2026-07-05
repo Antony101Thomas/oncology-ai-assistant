@@ -511,6 +511,20 @@
   </div>
 </div>
 
+<!-- ── Sign-out confirmation (shown when Back is pressed at the start of the app) ── -->
+<div class="modal-overlay" id="logoutConfirmModal" onclick="if(event.target===this) cancelLogoutConfirm()">
+  <div class="modal-box" style="max-width:360px;">
+    <div class="modal-title"><i class="ti ti-logout" style="color:var(--danger);"></i> Sign out?</div>
+    <div class="modal-body">
+      Going back further will sign you out of ONCO AI. Do you want to sign out, or stay where you are?
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="auth-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text);flex:1;" onclick="cancelLogoutConfirm()">Stay signed in</button>
+      <button class="auth-btn" style="background:var(--danger);flex:1;" onclick="confirmLogoutFromBack()">Sign out</button>
+    </div>
+  </div>
+</div>
+
 <div class="shell">
 
   <!-- Top bar -->
@@ -542,13 +556,11 @@
           <span class="profile-initials" id="profileInitials">?</span>
         </div>
         <div class="profile-dropdown" id="profileDropdown">
-          <div class="pd-header">
-            <div class="profile-avatar" id="profileAvatarLarge" style="width:44px;height:44px;font-size:17px;margin:0 auto;cursor:default;">
-              <span class="profile-initials" id="profileInitialsLarge">?</span>
-            </div>
-          </div>
           <div class="pd-item" onclick="closeProfileMenu(); showView('profile')">
-            <i class="ti ti-user-circle"></i> My Profile
+            <div class="profile-avatar" id="profileAvatarMenu" style="width:20px;height:20px;font-size:10px;cursor:default;">
+              <span class="profile-initials" id="profileInitialsMenu">?</span>
+            </div>
+            My Profile
           </div>
           <div class="pd-item" onclick="closeProfileMenu(); openHelp()">
             <i class="ti ti-info-circle"></i> Help & About
@@ -810,6 +822,37 @@ document.addEventListener('click', () => closeProfileMenu());
 function openHelp()  { document.getElementById('helpModal').classList.add('open'); }
 function closeHelp() { document.getElementById('helpModal').classList.remove('open'); }
 
+// ── Back-button navigation ──────────────────────────────────────────────────
+// Every showView() call pushes a history entry (see showView()), so the
+// mouse/keyboard Back and Forward buttons step through in-app views
+// (chat ↔ history ↔ profile) instead of leaving the page. When Back is
+// pressed enough times to reach the "sentinel" entry set at login (i.e.
+// there's nothing left to go back to within the app), we ask the person
+// whether they want to sign out instead of silently dropping them onto
+// index.html or a stale screen.
+window.addEventListener('popstate', function (event) {
+  if (!authToken) return; // not signed in — nothing for this handler to manage
+
+  const state = event.state;
+  if (!state || !state.oncoView || state.oncoView === 'sentinel') {
+    // Restore the app to a valid state immediately, then ask the person
+    // what they want to do — don't let the back navigation silently
+    // dump them out of the app.
+    history.pushState({ oncoView: 'chat' }, '', window.location.pathname);
+    showLogoutConfirmModal();
+    return;
+  }
+
+  showView(state.oncoView, true);
+});
+
+function showLogoutConfirmModal()  { document.getElementById('logoutConfirmModal').classList.add('open'); }
+function cancelLogoutConfirm()     { document.getElementById('logoutConfirmModal').classList.remove('open'); }
+function confirmLogoutFromBack() {
+  document.getElementById('logoutConfirmModal').classList.remove('open');
+  logout();
+}
+
 // ── Auth screens ───────────────────────────────────────────────────────────
 function hideAllAuthScreens() {
   document.getElementById('loginScreen').style.display          = 'none';
@@ -907,6 +950,15 @@ function hideAuthScreens(userName, userEmail) {
   loadHistory();
   loadNccnFiles();
   fetchProfile();
+
+  // Mark the current history entry (this page load / OAuth return) as a
+  // "sentinel" — the boundary between the app and whatever came before it
+  // (index.html, a bookmark, etc). Then push 'chat' on top as the first
+  // real in-app view. See the popstate handler below: when Back lands back
+  // on the sentinel, that means the user is trying to leave the app, so we
+  // ask before actually letting that happen.
+  history.replaceState({ oncoView: 'sentinel' }, '', window.location.pathname);
+  showView('chat');
 }
 
 // ── Shared avatar rendering ─────────────────────────────────────────────────
@@ -916,7 +968,7 @@ function applyAvatarEverywhere(photoDataUrl, name) {
   const initials = (name || 'User').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   const targets = [
     { el: document.getElementById('profileAvatar'),      initialsEl: document.getElementById('profileInitials') },
-    { el: document.getElementById('profileAvatarLarge'), initialsEl: document.getElementById('profileInitialsLarge') },
+    { el: document.getElementById('profileAvatarMenu'), initialsEl: document.getElementById('profileInitialsMenu') },
     { el: document.getElementById('profilePhotoBig'),    initialsEl: document.getElementById('profilePhotoInitialsBig') },
   ];
   targets.forEach(({ el, initialsEl }) => {
@@ -1486,7 +1538,7 @@ async function loadHistory() {
 // ── Session history ───────────────────────────────────────────────────────
 const sessionHistory = [];
 
-function showView(view) {
+function showView(view, fromPopState) {
   document.getElementById('view-chat').style.display    = view === 'chat'    ? 'flex' : 'none';
   document.getElementById('view-history').style.display = view === 'history' ? 'flex' : 'none';
   document.getElementById('view-profile').style.display = view === 'profile' ? 'flex' : 'none';
@@ -1495,6 +1547,14 @@ function showView(view) {
   document.getElementById('nav-history').classList.toggle('active', view === 'history');
   if (view === 'history') renderHistoryView();
   if (view === 'profile') loadProfilePage();
+
+  // Record this view in browser history so the mouse/keyboard Back button
+  // steps backward through in-app views (chat → history → profile, etc.)
+  // instead of leaving the app. Skip when we're here *because of* a
+  // popstate event (Back was already pressed) to avoid pushing a duplicate.
+  if (!fromPopState) {
+    history.pushState({ oncoView: view }, '', window.location.pathname);
+  }
 }
 
 function renderHistoryView() {
