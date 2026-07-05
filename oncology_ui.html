@@ -352,7 +352,7 @@
       <input type="email" id="forgotEmail" name="onco-forgot-id" placeholder="you@example.com" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')"
              onkeydown="if(event.key==='Enter') submitForgotPassword()" />
     </div>
-    <button class="auth-btn" id="forgotBtn" onclick="submitForgotPassword()">GET OTP</button>
+    <button class="auth-btn" id="forgotBtn" onclick="submitForgotPassword()">Send Reset Link</button>
     <div class="auth-error" id="forgotError"></div>
     <div class="auth-success" id="forgotSuccess" style="display:none;"></div>
     <div class="auth-switch" style="margin-top:18px;">Remembered it? <span onclick="showLogin()">Sign In</span></div>
@@ -392,7 +392,11 @@
     </div>
     <div class="auth-field">
       <label>New Password</label>
-      <input type="password" id="resetPassword" name="onco-reset-secret" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
+      <input type="password" id="resetPassword" name="onco-reset-secret" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" />
+    </div>
+    <div class="auth-field">
+      <label>Confirm New Password</label>
+      <input type="password" id="resetPasswordConfirm" name="onco-reset-confirm" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"
              onkeydown="if(event.key==='Enter') submitResetPassword()" />
     </div>
     <button class="auth-btn" id="resetBtn" onclick="submitResetPassword()">Update Password</button>
@@ -690,7 +694,7 @@ function showOtp(email) {
 const AUTH_SCREEN_META = {
   login:    { btnId: 'loginBtn',    idleLabel: 'Sign In',            loadingLabel: 'Signing in…' },
   register: { btnId: 'registerBtn', idleLabel: 'Create Account',     loadingLabel: 'Creating account…' },
-  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Get OTP',    loadingLabel: 'Sending OTP…' },
+  forgot:   { btnId: 'forgotBtn',   idleLabel: 'Send Reset Link',    loadingLabel: 'Sending…' },
   otp:      { btnId: 'otpBtn',      idleLabel: 'Verify Code',        loadingLabel: 'Verifying…' },
   reset:    { btnId: 'resetBtn',    idleLabel: 'Update Password',    loadingLabel: 'Updating…' },
 };
@@ -847,12 +851,14 @@ let pendingResetToken = null;
 
 async function submitResetPassword() {
   const password = document.getElementById('resetPassword').value;
+  const confirm  = document.getElementById('resetPasswordConfirm').value;
   const errEl    = document.getElementById('resetError');
   const okEl     = document.getElementById('resetSuccess');
   errEl.textContent = '';
   okEl.style.display = 'none';
   if (!password) { errEl.textContent = 'Please enter a new password.'; return; }
   if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
   if (!pendingResetToken) { errEl.textContent = 'This reset link is invalid. Please request a new one.'; return; }
 
   setAuthLoading(true, 'reset');
@@ -870,6 +876,7 @@ async function submitResetPassword() {
     okEl.textContent = 'Password updated! You can now sign in with your new password.';
     okEl.style.display = 'block';
     document.getElementById('resetPassword').value = '';
+    document.getElementById('resetPasswordConfirm').value = '';
     document.getElementById('resetBtn').style.display = 'none';
     setTimeout(showLogin, 2500);
   } catch {
