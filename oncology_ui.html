@@ -866,6 +866,10 @@ function hideAllAuthScreens() {
     clearInterval(approvalPollTimer);
     approvalPollTimer = null;
   }
+  if (typeof approvalTimeoutTimer !== 'undefined' && approvalTimeoutTimer) {
+    clearTimeout(approvalTimeoutTimer);
+    approvalTimeoutTimer = null;
+  }
 }
 
 function showLogin() {
@@ -873,6 +877,7 @@ function showLogin() {
   document.getElementById('loginScreen').style.display    = 'flex';
   document.getElementById('authThemeToggle').style.display = 'flex';
   document.getElementById('loginError').textContent       = '';
+  awaitingTwoFactorChallenge = false;
   setAuthLoading(false, 'login');
 }
 
@@ -940,6 +945,8 @@ function setAuthLoading(loading, screen = 'login') {
 function hideAuthScreens(userName, userEmail) {
   hideAllAuthScreens();
   document.getElementById('authThemeToggle').style.display = 'none';
+  document.getElementById('authLoadingOverlay').classList.remove('open');
+  awaitingTwoFactorChallenge = false;
 
   currentUserName  = userName  || 'User';
   currentUserEmail = userEmail || '';
@@ -1253,7 +1260,8 @@ async function submitLoginOtp() {
 }
 
 // ── Sign-in 2FA: emailed "it's me" approval link (polling) ─────────────────
-let approvalPollTimer = null;
+let approvalPollTimer   = null;
+let approvalTimeoutTimer = null;
 
 function showLoginApprovalWait(email, loginId) {
   hideAllAuthScreens();
@@ -1262,9 +1270,21 @@ function showLoginApprovalWait(email, loginId) {
   document.getElementById('loginApprovalSubText').textContent    = `We emailed an approval link to ${email}. Click it to finish signing in — this page updates automatically.`;
   document.getElementById('loginApprovalError').textContent      = '';
 
-  if (approvalPollTimer) clearInterval(approvalPollTimer);
+  if (approvalPollTimer)    clearInterval(approvalPollTimer);
+  if (approvalTimeoutTimer) clearTimeout(approvalTimeoutTimer);
+
   approvalPollTimer = setInterval(() => pollLoginApproval(loginId), 3000);
   pollLoginApproval(loginId);
+
+  // If nothing's happened after a while, say so instead of spinning
+  // silently — covers a missed/delayed email, a click on an old link, etc.
+  approvalTimeoutTimer = setTimeout(() => {
+    const errEl = document.getElementById('loginApprovalError');
+    if (errEl && !errEl.textContent) {
+      errEl.style.color = 'var(--text3)';
+      errEl.textContent = "Still waiting — didn't get the email? Check spam, or cancel and try again below.";
+    }
+  }, 45000);
 }
 
 async function pollLoginApproval(loginId) {
@@ -1272,20 +1292,25 @@ async function pollLoginApproval(loginId) {
     const res  = await fetch(`${API}/login/status/${loginId}`);
     if (res.status === 404) {
       clearInterval(approvalPollTimer);
-      document.getElementById('loginApprovalError').textContent = 'This sign-in request expired. Please try again.';
+      clearTimeout(approvalTimeoutTimer);
+      const errEl = document.getElementById('loginApprovalError');
+      errEl.style.color = 'var(--danger)';
+      errEl.textContent = 'This sign-in request expired or was replaced by a newer attempt. Please try again.';
       return;
     }
     const data = await res.json();
     if (data.approved) {
       clearInterval(approvalPollTimer);
+      clearTimeout(approvalTimeoutTimer);
       authToken = data.access_token;
       hideAuthScreens(data.user_name, data.user_email);
     }
-  } catch { /* keep polling silently */ }
+  } catch { /* keep polling silently — a single failed request isn't fatal */ }
 }
 
 function cancelLoginApprovalWait() {
-  if (approvalPollTimer) clearInterval(approvalPollTimer);
+  if (approvalPollTimer)    clearInterval(approvalPollTimer);
+  if (approvalTimeoutTimer) clearTimeout(approvalTimeoutTimer);
   showLogin();
 }
 
@@ -1450,15 +1475,26 @@ function googleLogin() {
   document.getElementById('registerScreen').style.display  = 'none';
   document.getElementById('authThemeToggle').style.display = 'none';
   document.getElementById('authLoadingOverlay').classList.add('open');
+  awaitingTwoFactorChallenge = false;
 
-  // If the user closes the popup without finishing sign-in, restore the login screen.
+  // If the user closes the popup without finishing sign-in, restore the
+  // login screen. The popup always closes itself right after handing back
+  // its result — including when that result is "please verify with a
+  // second step". So we must NOT revert to the login screen in that case:
+  // the message listener has already moved the user on to the OTP/approval
+  // screen, and awaitingTwoFactorChallenge (set there) tells us to leave it alone.
   const checkClosed = setInterval(() => {
     if (popup.closed) {
       clearInterval(checkClosed);
-      if (!authToken) {
-        document.getElementById('authLoadingOverlay').classList.remove('open');
-        showLogin();
-      }
+      // Grace period: the popup's "please verify" message may still be
+      // in flight when we notice it closed. Wait a beat before deciding
+      // there's really nothing to show.
+      setTimeout(() => {
+        if (!authToken && !awaitingTwoFactorChallenge) {
+          document.getElementById('authLoadingOverlay').classList.remove('open');
+          showLogin();
+        }
+      }, 500);
     }
   }, 400);
 }
@@ -1466,11 +1502,14 @@ function googleLogin() {
 // The popup (served from the API origin) posts the result back here once
 // Google sign-in finishes, then closes itself — the main page never
 // navigates to Google at all, so nothing shows up in back-history.
+let awaitingTwoFactorChallenge = false;
+
 window.addEventListener('message', function (event) {
   if (event.origin !== API) return;
   if (!event.data || event.data.type !== 'onco-google-auth') return;
 
   if (event.data.requires_2fa) {
+    awaitingTwoFactorChallenge = true;
     document.getElementById('authLoadingOverlay').classList.remove('open');
     if (event.data.method === 'otp') {
       pendingLoginTempToken = event.data.temp_token;

@@ -84,6 +84,19 @@ class QuestionRequest(BaseModel):
 pending_logins: dict[str, dict[str, Any]] = {}
 
 
+def _clear_pending_logins_for_user(user_id: int) -> None:
+    """
+    Only one link-based sign-in challenge should be "live" per user at a
+    time. If a new one is requested (e.g. the person tries Google sign-in,
+    then tries password sign-in before finishing the first), drop any
+    earlier pending entries so they don't end up with two valid emailed
+    links racing each other.
+    """
+    stale = [lid for lid, entry in pending_logins.items() if entry["user_id"] == user_id]
+    for lid in stale:
+        pending_logins.pop(lid, None)
+
+
 # ── Collection helpers ────────────────────────────────────────────────────────
 
 def ensure_collection() -> None:
@@ -212,6 +225,7 @@ def login(req: LoginRequest) -> dict[str, Any]:
     method = user.get("two_factor_method") or "otp"
 
     if method == "link":
+        _clear_pending_logins_for_user(user["id"])
         login_id = pysecrets.token_urlsafe(16)
         pending_logins[login_id] = {
             "user_id": user["id"],
@@ -499,6 +513,7 @@ async def google_callback(request: Request):
         method = user.get("two_factor_method") or "otp"
 
         if method == "link":
+            _clear_pending_logins_for_user(user["id"])
             login_id = pysecrets.token_urlsafe(16)
             pending_logins[login_id] = {
                 "user_id": user["id"],
@@ -567,7 +582,11 @@ async def google_callback(request: Request):
   const payload = {payload_json};
   if (window.opener) {{
     window.opener.postMessage(payload, "{FRONTEND_ORIGIN}");
-    window.close();
+    // Cross-window postMessage delivery is asynchronous — closing the
+    // popup on the very next line risks the opener seeing "popup closed"
+    // before it has actually processed the message (a real race that broke
+    // the 2FA hand-off). A short delay guarantees the message lands first.
+    setTimeout(() => window.close(), 300);
   }} else {{
     window.location.replace("{FRONTEND_URL}?{fallback_query}");
   }}
