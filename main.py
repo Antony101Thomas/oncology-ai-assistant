@@ -21,6 +21,7 @@ from auth import (create_reset_token, create_token, generate_otp, get_current_us
                   create_login_2fa_token, verify_login_2fa_token,
                   create_login_approval_token, verify_login_approval_token)
 from bm25_search import build_bm25_index
+from casual_chat import is_casual_message
 from chunker import chunk_pages
 from database import (create_user, get_user_by_email, get_reset_otp,
                       get_user_by_google_id, get_user_by_id, save_chat, get_user_history,
@@ -731,16 +732,23 @@ def serve_pdf(filename: str) -> FileResponse:
 @app.post("/ask")
 def ask_question(request: QuestionRequest,
                  current_user: dict = Depends(get_current_user)) -> dict[str, Any]:
-    if not indexed_chunks:
+    if not indexed_chunks and not is_casual_message(request.question):
         raise HTTPException(
             status_code=409,
             detail="No PDFs indexed yet. Upload PDFs first.",
         )
 
+    recent_history = get_user_history(current_user["id"], limit=3)
+    recent_history = [
+        {"question": r["question"], "answer": r["answer"]} for r in reversed(recent_history)
+    ]
+
     result = execute_rag_query(
         question=request.question,
         qdrant=qdrant,
         indexed_chunks=indexed_chunks,
+        user_name=current_user["name"],
+        chat_history=recent_history,
     )
 
     save_chat(
@@ -765,7 +773,7 @@ def ask_question_guest(request: QuestionRequest) -> dict[str, Any]:
     persist anything to chat_history. The free-question limit is enforced by
     the guest frontend (guest.html); this endpoint just answers the question.
     """
-    if not indexed_chunks:
+    if not indexed_chunks and not is_casual_message(request.question):
         raise HTTPException(
             status_code=409,
             detail="No PDFs indexed yet. Upload PDFs first.",

@@ -19,6 +19,7 @@ from groq import Groq
 from qdrant_client import QdrantClient
 
 from bm25_search import keyword_search
+from casual_chat import is_casual_message, generate_casual_reply
 from clinical_trials import search_clinical_trials
 from embedder import embed_query
 from pubmed_search import search_pubmed
@@ -115,6 +116,8 @@ def execute_rag_query(
     question: str,
     qdrant: QdrantClient,
     indexed_chunks: list[dict],
+    user_name: str | None = None,
+    chat_history: list[dict] | None = None,
 ) -> dict[str, Any]:
     """
     Full agentic RAG pipeline for one oncology question.
@@ -123,6 +126,9 @@ def execute_rag_query(
         question:       The user's natural-language question.
         qdrant:         Shared QdrantClient (must have COLLECTION already indexed).
         indexed_chunks: The list of chunks currently in the index.
+        user_name:      Optional display name, used to personalize casual replies.
+        chat_history:   Optional recent {"question", "answer"} turns, used for
+                        light conversational context on casual messages.
 
     Returns a dict with keys:
         question, route, answer, confidence, citations,
@@ -131,6 +137,21 @@ def execute_rag_query(
 
     print(f"\n{'='*60}")
     print(f"[Agent] Question: {question}")
+
+    # ── Stage 0: Casual small talk short-circuit ───────────────────
+    if is_casual_message(question):
+        print("[Agent] Casual message detected — skipping RAG pipeline")
+        reply = generate_casual_reply(question, user_name=user_name, recent_history=chat_history)
+        return {
+            "question": question,
+            "route": "casual",
+            "answer": reply,
+            "confidence": "n/a",
+            "citations": [],
+            "validated": True,
+            "validation_detail": {"valid": True, "status": "casual", "reason": "Small talk — not a medical claim."},
+            "refused": False,
+        }
 
     # ── Stage 1: Classify ────────────────────────────────────────
     route = classify_query(question)
