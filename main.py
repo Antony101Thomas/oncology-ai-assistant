@@ -27,12 +27,15 @@ from database import (create_user, get_user_by_email, get_reset_otp,
                       set_reset_otp, increment_otp_attempts, clear_reset_otp,
                       update_user_password, update_user_name, update_user_photo,
                       update_two_factor_settings, set_login_otp, get_login_otp,
-                      increment_login_otp_attempts, clear_login_otp)
+                      increment_login_otp_attempts, clear_login_otp,
+                      set_registration_otp, get_registration_otp,
+                      increment_registration_otp_attempts, mark_email_verified)
 from embedder import embed_texts
 from models import (ForgotPasswordRequest, LoginRequest, RegisterRequest,
                     ResetPasswordRequest, Token, VerifyOtpRequest,
                     UpdateNameRequest, UpdatePhotoRequest, ChangePasswordRequest,
-                    TwoFactorSettingsRequest, VerifyLoginOtpRequest)
+                    TwoFactorSettingsRequest, VerifyLoginOtpRequest,
+                    VerifyRegistrationOtpRequest, ResendRegistrationOtpRequest)
 from pdf_extractor import extract_pdf_pages
 from rag_agent import execute_rag_query
 
@@ -196,14 +199,106 @@ def health_check() -> dict[str, Any]:
 
 # ── Auth routes ───────────────────────────────────────────────────────────────
 
-@app.post("/register", response_model=Token)
-def register(req: RegisterRequest):
+def send_registration_otp_email(to_email: str, otp: str) -> None:
+    if not RESEND_API_KEY:
+        print(f"[Register] RESEND_API_KEY not set. Verification code for {to_email}: {otp}")
+        return
+    try:
+        requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}"},
+            json={
+                "from": RESEND_FROM_EMAIL,
+                "to": [to_email],
+                "subject": "Verify your ONCO AI account",
+                "html": (
+                    "<p>Welcome to ONCO AI! Enter this code to verify your email "
+                    "and finish creating your account:</p>"
+                    f"<p style=\"font-size:28px;font-weight:700;letter-spacing:4px;\">{otp}</p>"
+                    "<p>This code expires in 10 minutes. If you didn't request this, "
+                    "you can safely ignore this email.</p>"
+                ),
+            },
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        print(f"[Register] Failed to send verification email: {exc}")
+
+
+@app.post("/register")
+def register(req: RegisterRequest) -> dict[str, Any]:
     if get_user_by_email(req.email):
         raise HTTPException(status_code=400, detail="Email already registered")
+
     hashed = hash_password(req.password)
     user = create_user(req.email, hashed, req.name, provider="local")
+    if not user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    # Local accounts start unverified. Send an OTP and hand the frontend a
+    # "please verify" signal instead of an access token — mirrors the
+    # requires_2fa shape used by /login below, just at signup time.
+    otp = generate_otp()
+    otp_hash = hash_otp(otp)
+    expires_at = (datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRE_MINUTES)).isoformat()
+    set_registration_otp(user["id"], otp_hash, expires_at)
+    send_registration_otp_email(user["email"], otp)
+
+    return {
+        "requires_verification": True,
+        "email": user["email"],
+        "message": "A verification code has been sent to your email.",
+    }
+
+
+@app.post("/verify-registration-otp", response_model=Token)
+def verify_registration_otp(req: VerifyRegistrationOtpRequest):
+    generic_error = "Invalid or expired code."
+    user = get_user_by_email(req.email)
+    if not user or user.get("provider") != "local":
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    if user.get("email_verified"):
+        # Already verified (e.g. a double submit) — just sign them in
+        # rather than erroring on a stale/reused code.
+        token = create_token(user["id"])
+        return Token(access_token=token, user_name=user["name"], user_email=user["email"])
+
+    record = get_registration_otp(user["id"])
+    if not record or not record.get("reg_otp_hash"):
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    if record["reg_otp_attempts"] >= OTP_MAX_ATTEMPTS:
+        raise HTTPException(status_code=429, detail="Too many attempts. Please request a new code.")
+
+    expires_at = datetime.fromisoformat(record["reg_otp_expires"])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    if hash_otp(req.otp.strip()) != record["reg_otp_hash"]:
+        increment_registration_otp_attempts(user["id"])
+        raise HTTPException(status_code=400, detail=generic_error)
+
+    mark_email_verified(user["id"])
     token = create_token(user["id"])
     return Token(access_token=token, user_name=user["name"], user_email=user["email"])
+
+
+@app.post("/register/resend-otp")
+def resend_registration_otp(req: ResendRegistrationOtpRequest) -> dict[str, Any]:
+    user = get_user_by_email(req.email)
+    if not user or user.get("provider") != "local":
+        # Don't reveal whether the account exists.
+        return {"message": "If that account needs verification, a new code has been sent."}
+    if user.get("email_verified"):
+        return {"message": "This account is already verified."}
+
+    otp = generate_otp()
+    otp_hash = hash_otp(otp)
+    expires_at = (datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRE_MINUTES)).isoformat()
+    set_registration_otp(user["id"], otp_hash, expires_at)
+    send_registration_otp_email(user["email"], otp)
+    return {"message": "A new verification code has been sent."}
 
 
 @app.post("/login")
@@ -211,6 +306,12 @@ def login(req: LoginRequest) -> dict[str, Any]:
     user = get_user_by_email(req.email)
     if not user or not verify_password(req.password, user["hashed_password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if user.get("provider") == "local" and not user.get("email_verified"):
+        raise HTTPException(
+            status_code=403,
+            detail="Please verify your email before signing in.",
+        )
 
     if not user.get("two_factor_enabled"):
         token = create_token(user["id"])
