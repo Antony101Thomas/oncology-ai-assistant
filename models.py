@@ -23,13 +23,6 @@ class VerifyOtpRequest(BaseModel):
     email: str
     otp: str
 
-class VerifyRegistrationOtpRequest(BaseModel):
-    email: str
-    otp: str
-
-class ResendRegistrationOtpRequest(BaseModel):
-    email: str
-
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

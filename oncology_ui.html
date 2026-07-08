@@ -381,29 +381,6 @@
   </div>
 </div>
 
-<!-- ── Registration email-verification Screen ── -->
-<div class="auth-screen" id="registerVerifyScreen" style="display:none;">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <div class="auth-logo-icon"><i class="ti ti-mail-check"></i></div>
-      <div class="auth-title">ONCO AI</div>
-      <div class="auth-sub" id="registerVerifySubText">Enter the 6-digit code we sent you</div>
-    </div>
-    <div class="auth-field">
-      <label>Verification Code</label>
-      <input type="text" id="registerVerifyCode" name="onco-register-verify-code" placeholder="123456" maxlength="6"
-             inputmode="numeric" autocomplete="one-time-code" style="letter-spacing:6px;font-size:18px;text-align:center;"
-             onkeydown="if(event.key==='Enter') submitRegisterVerify()" />
-    </div>
-    <button class="auth-btn" id="registerVerifyBtn" onclick="submitRegisterVerify()">Verify & create account</button>
-    <div class="auth-error" id="registerVerifyError"></div>
-    <div class="auth-switch" style="margin-top:18px;">
-      Didn't get it? <span onclick="resendRegisterVerifyOtp()">Resend code</span>
-    </div>
-    <div class="auth-switch">Wrong email? <span onclick="showRegister()">Go back</span></div>
-  </div>
-</div>
-
 <!-- ── Forgot Password Screen ── -->
 <div class="auth-screen" id="forgotScreen" style="display:none;">
   <div class="auth-card">
@@ -880,7 +857,6 @@ function confirmLogoutFromBack() {
 function hideAllAuthScreens() {
   document.getElementById('loginScreen').style.display          = 'none';
   document.getElementById('registerScreen').style.display       = 'none';
-  document.getElementById('registerVerifyScreen').style.display  = 'none';
   document.getElementById('forgotScreen').style.display         = 'none';
   document.getElementById('otpScreen').style.display             = 'none';
   document.getElementById('resetScreen').style.display           = 'none';
@@ -911,18 +887,6 @@ function showRegister() {
   document.getElementById('authThemeToggle').style.display = 'flex';
   document.getElementById('registerError').textContent    = '';
   setAuthLoading(false, 'register');
-}
-
-let pendingRegisterVerifyEmail = null;
-
-function showRegisterVerify(email) {
-  hideAllAuthScreens();
-  document.getElementById('registerVerifyScreen').style.display = 'flex';
-  document.getElementById('authThemeToggle').style.display      = 'flex';
-  document.getElementById('registerVerifyError').textContent    = '';
-  document.getElementById('registerVerifyCode').value            = '';
-  document.getElementById('registerVerifySubText').textContent   = `Enter the 6-digit code sent to ${email}`;
-  pendingRegisterVerifyEmail = email;
 }
 
 function showForgotPassword() {
@@ -1350,48 +1314,6 @@ function cancelLoginApprovalWait() {
   showLogin();
 }
 
-// ── Registration email verification ─────────────────────────────────────
-async function submitRegisterVerify() {
-  const otp   = document.getElementById('registerVerifyCode').value.trim();
-  const errEl = document.getElementById('registerVerifyError');
-  const btn   = document.getElementById('registerVerifyBtn');
-  errEl.textContent = '';
-  if (!otp || otp.length !== 6) { errEl.textContent = 'Enter the 6-digit code.'; return; }
-  if (!pendingRegisterVerifyEmail) { errEl.textContent = 'Session expired — please register again.'; return; }
-
-  btn.disabled = true; btn.innerHTML = '<div class="spin"></div>Verifying…';
-  try {
-    const res  = await fetch(`${API}/verify-registration-otp`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: pendingRegisterVerifyEmail, otp })
-    });
-    const data = await res.json().catch(() => ({}));
-    btn.disabled = false; btn.innerHTML = 'Verify & create account';
-    if (!res.ok) { errEl.textContent = data.detail || 'Invalid or expired code.'; return; }
-    authToken = data.access_token;
-    pendingRegisterVerifyEmail = null;
-    hideAuthScreens(data.user_name, data.user_email);
-  } catch {
-    btn.disabled = false; btn.innerHTML = 'Verify & create account';
-    errEl.textContent = 'Cannot reach server. Is FastAPI running?';
-  }
-}
-
-async function resendRegisterVerifyOtp() {
-  if (!pendingRegisterVerifyEmail) { showRegister(); return; }
-  const errEl = document.getElementById('registerVerifyError');
-  errEl.textContent = 'Sending a new code…';
-  try {
-    await fetch(`${API}/register/resend-otp`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: pendingRegisterVerifyEmail })
-    });
-    errEl.textContent = 'A new code has been sent.';
-  } catch {
-    errEl.textContent = 'Cannot reach server.';
-  }
-}
-
 // ── Register ──────────────────────────────────────────────────────────────
 async function submitRegister() {
   const name     = document.getElementById('registerName').value.trim();
@@ -1410,20 +1332,8 @@ async function submitRegister() {
     });
     const data = await res.json();
     if (!res.ok) { errEl.textContent = data.detail || 'Registration failed.'; setAuthLoading(false, 'register'); return; }
-
-    setAuthLoading(false, 'register');
-
-    if (data.requires_verification) {
-      showRegisterVerify(data.email || email);
-      return;
-    }
-
-    // Fallback shape (shouldn't normally happen, but keeps this resilient
-    // if a future backend variant returns a token directly).
-    if (data.access_token) {
-      authToken = data.access_token;
-      hideAuthScreens(data.user_name, data.user_email);
-    }
+    authToken = data.access_token;
+    hideAuthScreens(data.user_name, data.user_email);
   } catch {
     errEl.textContent = 'Cannot reach server. Is FastAPI running?';
     setAuthLoading(false, 'register');

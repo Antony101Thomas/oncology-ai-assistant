@@ -102,18 +102,6 @@ def create_tables() -> None:
         conn.execute(text("""
             ALTER TABLE users ADD COLUMN IF NOT EXISTS login_otp_attempts INTEGER NOT NULL DEFAULT 0
         """))
-        conn.execute(text("""
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE
-        """))
-        conn.execute(text("""
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS reg_otp_hash TEXT
-        """))
-        conn.execute(text("""
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS reg_otp_expires TEXT
-        """))
-        conn.execute(text("""
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS reg_otp_attempts INTEGER NOT NULL DEFAULT 0
-        """))
 
     print("[DB] Tables ready on Supabase Postgres")
 
@@ -130,19 +118,14 @@ def create_user(email: str, hashed_password: str | None,
     try:
         with engine.begin() as conn:
             conn.execute(text("""
-                INSERT INTO users (email, hashed_password, name, provider, google_id,
-                                    email_verified, created_at)
-                VALUES (:email, :hashed_password, :name, :provider, :google_id,
-                        :email_verified, :created_at)
+                INSERT INTO users (email, hashed_password, name, provider, google_id, created_at)
+                VALUES (:email, :hashed_password, :name, :provider, :google_id, :created_at)
             """), {
                 "email": email,
                 "hashed_password": hashed_password,
                 "name": name,
                 "provider": provider,
                 "google_id": google_id,
-                # Google already verifies the email on their end; local
-                # accounts start unverified until they complete the OTP step.
-                "email_verified": provider == "google",
                 "created_at": datetime.now(timezone.utc).isoformat(),
             })
         return get_user_by_email(email)
@@ -252,44 +235,6 @@ def clear_login_otp(user_id: int) -> None:
     with engine.begin() as conn:
         conn.execute(text("""
             UPDATE users SET login_otp_hash = NULL, login_otp_expires = NULL, login_otp_attempts = 0
-            WHERE id = :id
-        """), {"id": user_id})
-
-
-# ── Registration email-verification OTP ─────────────────────────────────────
-
-def set_registration_otp(user_id: int, otp_hash: str, expires_at: str) -> None:
-    with engine.begin() as conn:
-        conn.execute(text("""
-            UPDATE users
-            SET reg_otp_hash = :otp_hash, reg_otp_expires = :expires_at, reg_otp_attempts = 0
-            WHERE id = :id
-        """), {"otp_hash": otp_hash, "expires_at": expires_at, "id": user_id})
-
-
-def get_registration_otp(user_id: int) -> dict | None:
-    with engine.connect() as conn:
-        row = conn.execute(text("""
-            SELECT reg_otp_hash, reg_otp_expires, reg_otp_attempts
-            FROM users WHERE id = :id
-        """), {"id": user_id}).fetchone()
-    return _row_to_dict(row)
-
-
-def increment_registration_otp_attempts(user_id: int) -> None:
-    with engine.begin() as conn:
-        conn.execute(text("""
-            UPDATE users SET reg_otp_attempts = reg_otp_attempts + 1 WHERE id = :id
-        """), {"id": user_id})
-
-
-def mark_email_verified(user_id: int) -> None:
-    """Called after a successful registration-OTP check. Clears the OTP
-    fields too, same principle as clear_reset_otp()."""
-    with engine.begin() as conn:
-        conn.execute(text("""
-            UPDATE users
-            SET email_verified = TRUE, reg_otp_hash = NULL, reg_otp_expires = NULL, reg_otp_attempts = 0
             WHERE id = :id
         """), {"id": user_id})
 
