@@ -7,10 +7,17 @@ check-in, thanks, "remember when I asked..."), we skip retrieval/live
 APIs/validation entirely and answer directly with a persona-scoped LLM call.
 """
 
+import os
 import re
-from groq import Groq
+from dotenv import load_dotenv
+from openai import OpenAI
 
-groq_client = Groq()
+load_dotenv()
+
+xai_client = OpenAI(
+    api_key=os.getenv("XAI_API_KEY"),
+    base_url="https://api.x.ai/v1",
+)
 
 # Narrow on purpose: greetings, check-ins, thanks, farewells, and meta
 # questions about the conversation itself. Anything else falls through
@@ -68,8 +75,8 @@ def generate_casual_reply(question: str, user_name: str | None = None,
     user_block = f"The user's name is {user_name}.\n" if user_name else ""
     prompt = f'{user_block}{history_block}\n\nUser just said: "{question}"\n\nReply casually.'
 
-    response = groq_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+    response = xai_client.chat.completions.create(
+        model="grok-3-mini-fast",
         messages=[
             {"role": "system", "content": _CASUAL_SYSTEM_PROMPT},
             {"role": "user", "content": prompt},

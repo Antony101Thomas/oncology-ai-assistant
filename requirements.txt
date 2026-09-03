@@ -9,8 +9,8 @@ pydantic
 # ── Environment / config ──────────────────────────────────────────────────────
 python-dotenv
 
-# ── LLM client ────────────────────────────────────────────────────────────────
-groq
+# ── LLM client (xAI Grok — OpenAI-compatible) ────────────────────────────────
+openai
 
 # ── Vector store ──────────────────────────────────────────────────────────────
 qdrant-client

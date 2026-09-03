@@ -181,6 +181,19 @@ async def startup() -> None:
         print(f"Backend ready without PDFs. {exc}")
 
 
+# ── Root route ────────────────────────────────────────────────────────────────
+
+@app.get("/")
+def root() -> dict[str, Any]:
+    return {
+        "status": "ok",
+        "message": "ONCO AI API is running",
+        "docs": "/docs",
+        "health": "/health",
+        "frontend": FRONTEND_URL,
+    }
+
+
 # ── Health ────────────────────────────────────────────────────────────────────
 
 @app.get("/health")

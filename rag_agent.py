@@ -14,8 +14,9 @@ execute_rag_query() is the single entry point that chains:
 from pathlib import Path
 from typing import Any
 
+import os
 from dotenv import load_dotenv
-from groq import Groq
+from openai import OpenAI
 from qdrant_client import QdrantClient
 
 from bm25_search import keyword_search
@@ -30,7 +31,10 @@ load_dotenv()
 
 COLLECTION = "oncology_docs"
 
-groq_client = Groq()
+xai_client = OpenAI(
+    api_key=os.getenv("XAI_API_KEY"),
+    base_url="https://api.x.ai/v1",
+)
 
 
 # ── Reciprocal Rank Fusion ────────────────────────────────────────────────────
@@ -258,8 +262,8 @@ Evidence:
 Question: {question}
 """
 
-    response = groq_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+    response = xai_client.chat.completions.create(
+        model="grok-3-mini-fast",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.1,
     )
