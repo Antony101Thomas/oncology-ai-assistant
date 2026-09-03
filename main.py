@@ -183,15 +183,28 @@ async def startup() -> None:
 
 # ── Root route ────────────────────────────────────────────────────────────────
 
-@app.get("/")
-def root() -> dict[str, Any]:
-    return {
-        "status": "ok",
-        "message": "ONCO AI API is running",
-        "docs": "/docs",
-        "health": "/health",
-        "frontend": FRONTEND_URL,
-    }
+@app.get("/", response_class=HTMLResponse)
+def root():
+    index_file = APP_DIR / "index.html"
+    if index_file.exists():
+        return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
+    return HTMLResponse(content="<h1>ONCO AI API is running</h1>")
+
+
+@app.get("/index.html", response_class=HTMLResponse)
+def serve_index():
+    index_file = APP_DIR / "index.html"
+    if index_file.exists():
+        return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
+    return HTMLResponse(content="<h1>ONCO AI API is running</h1>")
+
+
+@app.get("/guest.html", response_class=HTMLResponse)
+def serve_guest():
+    guest_file = APP_DIR / "guest.html"
+    if guest_file.exists():
+        return HTMLResponse(content=guest_file.read_text(encoding="utf-8"))
+    raise HTTPException(status_code=404, detail="guest.html not found")
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
