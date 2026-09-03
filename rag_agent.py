@@ -31,10 +31,16 @@ load_dotenv()
 
 COLLECTION = "oncology_docs"
 
-xai_client = OpenAI(
-    api_key=os.getenv("XAI_API_KEY"),
-    base_url="https://api.x.ai/v1",
-)
+_xai_client = None
+
+def _get_xai_client() -> OpenAI:
+    global _xai_client
+    if _xai_client is None:
+        _xai_client = OpenAI(
+            api_key=os.getenv("XAI_API_KEY"),
+            base_url="https://api.x.ai/v1",
+        )
+    return _xai_client
 
 
 # ── Reciprocal Rank Fusion ────────────────────────────────────────────────────
@@ -262,7 +268,7 @@ Evidence:
 Question: {question}
 """
 
-    response = xai_client.chat.completions.create(
+    response = _get_xai_client().chat.completions.create(
         model="grok-3-mini-fast",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.1,

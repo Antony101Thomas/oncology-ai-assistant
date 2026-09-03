@@ -14,10 +14,16 @@ from openai import OpenAI
 
 load_dotenv()
 
-xai_client = OpenAI(
-    api_key=os.getenv("XAI_API_KEY"),
-    base_url="https://api.x.ai/v1",
-)
+_xai_client = None
+
+def _get_xai_client() -> OpenAI:
+    global _xai_client
+    if _xai_client is None:
+        _xai_client = OpenAI(
+            api_key=os.getenv("XAI_API_KEY"),
+            base_url="https://api.x.ai/v1",
+        )
+    return _xai_client
 
 # Narrow on purpose: greetings, check-ins, thanks, farewells, and meta
 # questions about the conversation itself. Anything else falls through
@@ -75,7 +81,7 @@ def generate_casual_reply(question: str, user_name: str | None = None,
     user_block = f"The user's name is {user_name}.\n" if user_name else ""
     prompt = f'{user_block}{history_block}\n\nUser just said: "{question}"\n\nReply casually.'
 
-    response = xai_client.chat.completions.create(
+    response = _get_xai_client().chat.completions.create(
         model="grok-3-mini-fast",
         messages=[
             {"role": "system", "content": _CASUAL_SYSTEM_PROMPT},
