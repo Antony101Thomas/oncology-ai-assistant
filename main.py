@@ -207,6 +207,14 @@ def serve_guest():
     raise HTTPException(status_code=404, detail="guest.html not found")
 
 
+@app.get("/oncology_ui.html", response_class=HTMLResponse)
+def serve_oncology_ui():
+    ui_file = APP_DIR / "oncology_ui.html"
+    if ui_file.exists():
+        return HTMLResponse(content=ui_file.read_text(encoding="utf-8"))
+    raise HTTPException(status_code=404, detail="oncology_ui.html not found")
+
+
 # ── Health ────────────────────────────────────────────────────────────────────
 
 @app.get("/health")
