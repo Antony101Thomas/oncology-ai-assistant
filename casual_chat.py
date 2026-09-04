@@ -19,27 +19,56 @@ _xai_client = None
 def _get_xai_client() -> OpenAI:
     global _xai_client
     if _xai_client is None:
+        api_key = os.getenv("XAI_API_KEY") or os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise RuntimeError("Set XAI_API_KEY or GROQ_API_KEY environment variable")
         _xai_client = OpenAI(
-            api_key=os.getenv("XAI_API_KEY"),
+            api_key=api_key,
             base_url="https://api.x.ai/v1",
         )
     return _xai_client
 
-# Narrow on purpose: greetings, check-ins, thanks, farewells, and meta
-# questions about the conversation itself. Anything else falls through
-# to the normal oncology pipeline (and gets refused there if off-topic).
+# Narrow on purpose: greetings, check-ins, thanks, farewells, meta
+# questions, jokes, compliments, feelings, and identity questions.
+# Anything else falls through to the normal oncology pipeline
+# (and gets refused there if off-topic).
 _CASUAL_PATTERNS = [
-    r"^\s*(hi|hey|hello|yo|sup)\b",
-    r"\bhow('?s| is| are)\s+(it going|you doing|things|you|your day)\b",
-    r"\bwhat'?s up\b",
+    # Greetings
+    r"^\s*(hi|hey|hello|yo|sup|hola|howdy|hii+|heyy+)\b",
     r"\bgood (morning|afternoon|evening|night)\b",
+    # Check-ins
+    r"\bhow('?s| is| are)\s+(it going|you doing|things|you|your day|everything|life)\b",
+    r"\bwhat'?s up\b",
     r"\bhow have you been\b",
-    r"\b(thanks|thank you|thx|appreciate it)\b",
-    r"\b(bye|goodbye|see you|see ya|later)\b",
+    r"\bhow('?s| is) it going\b",
+    # Thanks & appreciation
+    r"\b(thanks|thank you|thx|ty|appreciate it|much appreciated|thanks a lot)\b",
+    # Farewells
+    r"\b(bye|goodbye|see you|see ya|later|take care|good night|gn|cya|peace out)\b",
+    # Identity & capability questions
     r"\bwho are you\b",
     r"\bwhat can you do\b",
+    r"\bwhat('?s| is) your name\b",
+    r"\bare you (a bot|an? ai|real|human)\b",
+    r"\btell me about yourself\b",
+    # Conversation memory
     r"\b(do you remember|earlier|last time|previous(ly)?)\b.*\b(ask|said|talk|chat)\b",
     r"\bhow('?s| was) (our|your) (chat|conversation|talk)\b",
+    # Feelings & compliments
+    r"\b(you('?re| are) (amazing|awesome|great|cool|helpful|smart|the best))\b",
+    r"\b(i love you|love this|i like you|you rock|nice job|well done)\b",
+    r"\b(i('?m| am) (bored|sad|happy|tired|excited|confused|lonely|scared))\b",
+    r"\bhow do you feel\b",
+    # Fun & jokes
+    r"\btell me a (joke|fun fact|story)\b",
+    r"\b(make me laugh|say something funny|cheer me up)\b",
+    r"\b(lol|lmao|haha|rofl|😂|🤣)\b",
+    # Simple acknowledgements
+    r"^\s*(ok|okay|cool|nice|great|awesome|sure|alright|got it|noted|yep|yup|yeah)\s*[!.?]*\s*$",
+    # Help / what to ask
+    r"\bwhat (should|can) i ask\b",
+    r"\bhelp me\b",
+    r"\bwhat do you know\b",
 ]
 _CASUAL_RE = re.compile("|".join(_CASUAL_PATTERNS), re.IGNORECASE)
 

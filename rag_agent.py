@@ -36,8 +36,11 @@ _xai_client = None
 def _get_xai_client() -> OpenAI:
     global _xai_client
     if _xai_client is None:
+        api_key = os.getenv("XAI_API_KEY") or os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise RuntimeError("Set XAI_API_KEY or GROQ_API_KEY environment variable")
         _xai_client = OpenAI(
-            api_key=os.getenv("XAI_API_KEY"),
+            api_key=api_key,
             base_url="https://api.x.ai/v1",
         )
     return _xai_client
